@@ -5,388 +5,472 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="リマインダー">
-<title>リマインダー</title>
+<meta name="apple-mobile-web-app-title" content="ToDo">
+<title>ToDo リスト</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
 body {
   font-family: -apple-system, 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', sans-serif;
-  background: #F2F2F7;
+  background: #fff;
+  color: #202124;
   -webkit-font-smoothing: antialiased;
   min-height: 100vh;
+  overflow-x: hidden;
 }
 
+/* ── Header ── */
 #header {
-  background: rgba(242,242,247,0.95);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  padding-top: max(16px, env(safe-area-inset-top));
+  border-bottom: 1px solid #e0e0e0;
   position: sticky;
   top: 0;
-  z-index: 10;
-  padding: 16px 20px 0;
-  border-bottom: 0.5px solid rgba(0,0,0,0.1);
+  background: #fff;
+  z-index: 20;
 }
 
-#header-inner { max-width: 480px; margin: 0 auto; }
+#header-left { display: flex; align-items: center; gap: 12px; }
 
-#header-top {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  margin-bottom: 12px;
+#menu-btn {
+  background: none; border: none; cursor: pointer; padding: 4px; line-height: 0;
+  color: #5f6368;
 }
 
-#count-label { font-size: 13px; color: #8E8E93; font-weight: 500; margin-bottom: 2px; }
-h1 { font-size: 32px; font-weight: 700; color: #1C1C1E; line-height: 1.1; }
+#app-title {
+  font-size: 18px;
+  font-weight: 400;
+  color: #202124;
+  letter-spacing: 0;
+}
 
-#header-buttons { display: flex; gap: 8px; align-items: center; }
-
-.header-btn {
-  background: white;
-  border: 1.5px solid #E5E5EA;
-  border-radius: 20px;
-  padding: 7px 14px;
-  font-size: 13px;
-  font-weight: 600;
-  color: #3A3A3C;
-  cursor: pointer;
+#sync-pill {
   display: flex;
   align-items: center;
   gap: 5px;
-  transition: all 0.2s;
+  font-size: 12px;
+  color: #9aa0a6;
+  padding: 3px 8px;
+  border-radius: 12px;
+  background: #f8f9fa;
+  transition: all 0.3s;
+}
+#sync-pill.syncing { color: #fbbc04; background: #fef9e7; }
+#sync-pill.ok { color: #34a853; background: #e6f4ea; }
+#sync-pill.error { color: #ea4335; background: #fce8e6; }
+
+#sync-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: #9aa0a6; flex-shrink: 0; transition: background 0.3s;
+}
+#sync-pill.syncing #sync-dot { background: #fbbc04; animation: blink 1s infinite; }
+#sync-pill.ok #sync-dot { background: #34a853; }
+#sync-pill.error #sync-dot { background: #ea4335; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+
+/* ── Tabs ── */
+#tabs {
+  display: flex;
+  border-bottom: 1px solid #e0e0e0;
+  padding: 0 20px;
+  gap: 0;
+}
+
+.tab-btn {
+  padding: 12px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #5f6368;
+  background: none;
+  border: none;
+  border-bottom: 3px solid transparent;
+  cursor: pointer;
   font-family: inherit;
+  transition: all 0.15s;
   white-space: nowrap;
 }
-
-#claude-btn.active { background: #FFF3E0; border-color: #FF9500; color: #FF9500; }
-#copy-btn { border-color: #34C759; color: #34C759; }
-#copy-btn.copied { background: #F0FFF4; }
-
-#filters { display: flex; gap: 4px; padding-bottom: 12px; }
-
-.filter-btn {
-  padding: 6px 14px;
-  border-radius: 16px;
-  border: none;
-  font-size: 13px;
-  font-weight: 400;
-  background: transparent;
-  color: #8E8E93;
-  cursor: pointer;
-  transition: all 0.15s;
-  font-family: inherit;
-}
-.filter-btn.active { font-weight: 600; background: #007AFF; color: white; }
-
-#main { max-width: 480px; margin: 0 auto; padding: 16px 16px 140px; }
-
-/* Claude panel */
-#claude-panel {
-  background: white;
-  border-radius: 16px;
-  padding: 16px;
-  margin-bottom: 12px;
-  border: 1px solid #FFE0B2;
-  box-shadow: 0 2px 12px rgba(255,149,0,0.08);
-  display: none;
-}
-#claude-panel.open { display: block; }
-
-#claude-panel-title {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 12px;
-  font-size: 14px;
-  font-weight: 600;
-  color: #1C1C1E;
+.tab-btn.active {
+  color: #1a73e8;
+  border-bottom-color: #1a73e8;
 }
 
-#claude-response {
-  background: #FFF8F0;
-  border-radius: 12px;
-  padding: 12px;
-  margin-bottom: 12px;
-  font-size: 14px;
-  color: #3A3A3C;
-  line-height: 1.7;
-  white-space: pre-wrap;
-  border-left: 3px solid #FF9500;
-  display: none;
-}
-
-#claude-input-row { display: flex; gap: 8px; }
-
-#claude-input {
-  flex: 1;
-  border: 1px solid #E5E5EA;
-  border-radius: 10px;
-  padding: 9px 12px;
-  font-size: 14px;
-  outline: none;
-  color: #1C1C1E;
-  background: #F9F9F9;
-  font-family: inherit;
-}
-
-#claude-ask-btn {
-  background: #FF9500;
-  color: white;
-  border: none;
-  border-radius: 10px;
-  padding: 9px 16px;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-  font-family: inherit;
-  transition: opacity 0.2s;
-}
-#claude-ask-btn:disabled { opacity: 0.5; cursor: default; }
-
-/* Task list */
-#task-list {
-  background: white;
-  border-radius: 16px;
-  overflow: hidden;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+/* ── Task list ── */
+#main {
+  padding: 0 0 120px;
+  max-width: 600px;
+  margin: 0 auto;
 }
 
 .task-item {
   display: flex;
-  align-items: center;
-  padding: 14px 16px;
-  border-bottom: 0.5px solid #F2F2F7;
-  gap: 12px;
-}
-.task-item:last-child { border-bottom: none; }
-
-.check-btn {
-  background: none;
-  border: none;
-  padding: 0;
+  align-items: flex-start;
+  padding: 14px 20px;
+  border-bottom: 1px solid #f1f3f4;
+  gap: 14px;
   cursor: pointer;
-  flex-shrink: 0;
-  line-height: 0;
-  width: 22px;
-  height: 22px;
+  transition: background 0.1s;
+  -webkit-user-select: none;
+  user-select: none;
 }
+.task-item:active { background: #f8f9fa; }
+
+.check-wrap {
+  flex-shrink: 0;
+  margin-top: 1px;
+  width: 20px; height: 20px;
+  position: relative;
+}
+
+.check-circle {
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  border: 2px solid #bdc1c6;
+  background: none;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+.check-circle.done {
+  background: #1a73e8;
+  border-color: #1a73e8;
+}
+
+.task-body { flex: 1; min-width: 0; }
 
 .task-text {
-  flex: 1;
   font-size: 16px;
-  color: #1C1C1E;
-  line-height: 1.4;
+  color: #202124;
+  line-height: 1.5;
   word-break: break-all;
 }
-.task-text.done { color: #C7C7CC; text-decoration: line-through; }
+.task-text.done {
+  color: #bdc1c6;
+  text-decoration: line-through;
+}
 
 .delete-btn {
   background: none;
   border: none;
-  padding: 4px;
+  padding: 2px 4px;
   cursor: pointer;
-  opacity: 0.35;
-  line-height: 0;
+  color: #bdc1c6;
+  opacity: 0;
+  transition: opacity 0.15s;
   flex-shrink: 0;
+  line-height: 0;
+  margin-top: 1px;
 }
-.delete-btn:active { opacity: 0.9; }
+.task-item:hover .delete-btn { opacity: 1; }
+.task-item:active .delete-btn { opacity: 1; }
+
+/* 完了済みセクションヘッダー */
+.section-header {
+  padding: 16px 20px 8px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #5f6368;
+  letter-spacing: 0.01em;
+}
 
 #empty-msg {
-  padding: 40px 20px;
+  padding: 60px 20px;
   text-align: center;
-  color: #C7C7CC;
+  color: #bdc1c6;
   font-size: 15px;
+  line-height: 1.6;
 }
 
-#clear-done-btn {
-  width: 100%;
-  margin-top: 12px;
-  padding: 12px;
-  background: white;
-  border: none;
-  border-radius: 12px;
-  color: #FF3B30;
-  font-size: 15px;
-  font-weight: 500;
-  cursor: pointer;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
-  font-family: inherit;
-  display: none;
-}
-
-/* Toast */
-#toast {
+/* ── FAB（中央下の+ボタン） ── */
+#fab {
   position: fixed;
-  bottom: 110px;
+  bottom: max(28px, env(safe-area-inset-bottom, 28px));
   left: 50%;
-  transform: translateX(-50%) translateY(10px);
-  background: rgba(40,40,40,0.92);
+  transform: translateX(-50%);
+  width: 56px; height: 56px;
+  border-radius: 50%;
+  background: #1a73e8;
   color: white;
-  padding: 10px 20px;
+  border: none;
+  font-size: 28px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(26,115,232,0.4);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 30;
+  transition: transform 0.2s, box-shadow 0.2s;
+  line-height: 1;
+  padding-bottom: 1px;
+}
+#fab:active {
+  transform: translateX(-50%) scale(0.93);
+  box-shadow: 0 2px 6px rgba(26,115,232,0.3);
+}
+#fab.open { background: #5f6368; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+
+/* ── 入力シート（下から出てくる） ── */
+#input-sheet {
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  background: #fff;
+  border-radius: 20px 20px 0 0;
+  box-shadow: 0 -4px 24px rgba(0,0,0,0.12);
+  padding: 20px 20px;
+  padding-bottom: max(24px, env(safe-area-inset-bottom));
+  z-index: 25;
+  transform: translateY(100%);
+  transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+}
+#input-sheet.open { transform: translateY(0); }
+
+#input-sheet-handle {
+  width: 36px; height: 4px;
+  background: #e0e0e0;
+  border-radius: 2px;
+  margin: 0 auto 16px;
+}
+
+#new-task-input {
+  width: 100%;
+  border: none;
+  outline: none;
+  font-size: 16px;
+  color: #202124;
+  font-family: inherit;
+  padding: 0;
+  background: transparent;
+  caret-color: #1a73e8;
+}
+#new-task-input::placeholder { color: #9aa0a6; }
+
+#input-divider {
+  height: 1px;
+  background: #1a73e8;
+  margin: 12px 0 16px;
+}
+
+#input-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.input-action-btn {
+  padding: 8px 20px;
   border-radius: 20px;
+  border: none;
   font-size: 14px;
   font-weight: 500;
-  opacity: 0;
-  transition: all 0.25s;
-  pointer-events: none;
-  white-space: nowrap;
-  z-index: 100;
-}
-#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
-
-/* Bottom input */
-#bottom-bar {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: rgba(242,242,247,0.95);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border-top: 0.5px solid rgba(0,0,0,0.1);
-  padding: 12px 16px;
-  padding-bottom: max(12px, env(safe-area-inset-bottom));
-}
-
-#bottom-bar-inner { max-width: 480px; margin: 0 auto; display: flex; gap: 10px; }
-
-#task-input {
-  flex: 1;
-  border: 1px solid #E5E5EA;
-  border-radius: 12px;
-  padding: 12px 16px;
-  font-size: 16px;
-  outline: none;
-  color: #1C1C1E;
-  background: white;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  cursor: pointer;
   font-family: inherit;
+  transition: background 0.15s;
 }
 
-#add-btn {
-  background: #E5E5EA;
+#cancel-btn {
+  background: none;
+  color: #5f6368;
+}
+#cancel-btn:hover { background: #f1f3f4; }
+
+#save-btn {
+  background: #1a73e8;
   color: white;
-  border: none;
-  border-radius: 12px;
-  width: 48px;
-  font-size: 26px;
-  cursor: default;
-  transition: background 0.15s;
+}
+#save-btn:hover { background: #1557b0; }
+#save-btn:disabled { background: #e0e0e0; color: #9aa0a6; cursor: default; }
+
+/* ── オーバーレイ ── */
+#overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.3);
+  z-index: 24;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s;
+}
+#overlay.open { opacity: 1; pointer-events: auto; }
+
+/* コピーボタン（ヘッダー右） */
+#copy-btn {
+  background: none;
+  border: 1px solid #dadce0;
+  border-radius: 20px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #5f6368;
+  cursor: pointer;
+  font-family: inherit;
   display: flex;
   align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  padding-bottom: 2px;
-  font-family: inherit;
+  gap: 5px;
+  transition: background 0.15s;
 }
-#add-btn.active { background: #007AFF; cursor: pointer; }
+#copy-btn:active { background: #f1f3f4; }
 </style>
 </head>
 <body>
 
+<!-- Header -->
 <div id="header">
-  <div id="header-inner">
-    <div id="header-top">
-      <div>
-        <div id="count-label"></div>
-        <h1>リマインダー</h1>
-      </div>
-      <div id="header-buttons">
-        <button class="header-btn" id="copy-btn" onclick="copyTasks()">
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
-          コピー
-        </button>
-        <button class="header-btn" id="claude-btn" onclick="toggleClaude()">
-          <svg width="13" height="13" viewBox="0 0 24 24"><path d="M12 2L13.5 9L20 10.5L13.5 12L12 19L10.5 12L4 10.5L10.5 9Z" fill="currentColor"/></svg>
-          Claude
-        </button>
-      </div>
+  <div id="header-left">
+    <button id="menu-btn">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
+    </button>
+    <span id="app-title">ToDo リスト</span>
+  </div>
+  <div style="display:flex;align-items:center;gap:8px;">
+    <div id="sync-pill">
+      <div id="sync-dot"></div>
+      <span id="sync-text">読込中</span>
     </div>
-    <div id="filters">
-      <button class="filter-btn active" onclick="setFilter('all',this)">すべて</button>
-      <button class="filter-btn" onclick="setFilter('active',this)">未完了</button>
-      <button class="filter-btn" onclick="setFilter('done',this)">完了</button>
-    </div>
+    <button id="copy-btn" onclick="copyTasks()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+      コピー
+    </button>
   </div>
 </div>
 
+<!-- Tabs -->
+<div id="tabs">
+  <button class="tab-btn active" onclick="setFilter('active',this)">マイタスク</button>
+  <button class="tab-btn" onclick="setFilter('done',this)">完了済み</button>
+  <button class="tab-btn" onclick="setFilter('all',this)">すべて</button>
+</div>
+
+<!-- Task list -->
 <div id="main">
-  <div id="claude-panel">
-    <div id="claude-panel-title">
-      <svg width="16" height="16" viewBox="0 0 24 24"><path d="M12 2L13.5 9L20 10.5L13.5 12L12 19L10.5 12L4 10.5L10.5 9Z" fill="#FF9500"/></svg>
-      Claudeに相談
-    </div>
-    <div id="claude-response"></div>
-    <div id="claude-input-row">
-      <input id="claude-input" type="text" placeholder="質問を入力（空白で整理してもらう）" onkeydown="if(event.key==='Enter')askClaude()">
-      <button id="claude-ask-btn" onclick="askClaude()">聞く</button>
-    </div>
-  </div>
-
-  <div id="task-list">
-    <div id="empty-msg">タスクを追加してみましょう</div>
-  </div>
-
-  <button id="clear-done-btn" onclick="clearDone()">完了済みを削除</button>
+  <div id="empty-msg">タスクを追加してみましょう</div>
 </div>
 
-<div id="toast"></div>
+<!-- Overlay -->
+<div id="overlay" onclick="closeSheet()"></div>
 
-<div id="bottom-bar">
-  <div id="bottom-bar-inner">
-    <input id="task-input" type="text" placeholder="新しいリマインダー…"
-      oninput="updateAddBtn()"
-      onkeydown="if(event.key==='Enter')addTask()">
-    <button id="add-btn" onclick="addTask()">+</button>
+<!-- FAB -->
+<button id="fab" onclick="toggleSheet()">
+  <svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+</button>
+
+<!-- Input sheet -->
+<div id="input-sheet">
+  <div id="input-sheet-handle"></div>
+  <input id="new-task-input" type="text" placeholder="新しいタスクを入力…"
+    oninput="updateSaveBtn()"
+    onkeydown="if(event.key==='Enter')saveTask()">
+  <div id="input-divider"></div>
+  <div id="input-actions">
+    <button class="input-action-btn" id="cancel-btn" onclick="closeSheet()">キャンセル</button>
+    <button class="input-action-btn" id="save-btn" disabled onclick="saveTask()">保存</button>
   </div>
 </div>
 
 <script>
-const STORAGE_KEY = 'reminder-tasks-v2';
-let tasks = [];
-let currentFilter = 'all';
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbzNEngb5IkUpSj5FDNVuuRYPNxuKugjkc0naqItiofhE_qMWfr9QBFA_4WDAGOek_UU/exec';
 
-function load() {
+let tasks = [];
+let currentFilter = 'active';
+let saveTimer = null;
+let sheetOpen = false;
+
+// ── 同期 ───────────────────────────────────
+function setSyncState(state, text) {
+  const pill = document.getElementById('sync-pill');
+  const tx   = document.getElementById('sync-text');
+  pill.className = state;
+  tx.textContent = text;
+}
+
+async function loadFromSheet() {
+  setSyncState('syncing', '読込中');
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    tasks = raw ? JSON.parse(raw) : [];
-  } catch { tasks = []; }
+    const res  = await fetch(GAS_URL + '?t=' + Date.now());
+    const data = await res.json();
+    tasks = data;
+    setSyncState('ok', '同期済み');
+  } catch {
+    setSyncState('error', 'オフライン');
+    try {
+      const raw = localStorage.getItem('reminder-tasks-v3');
+      tasks = raw ? JSON.parse(raw) : [];
+    } catch { tasks = []; }
+  }
   render();
 }
 
-function save() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+async function saveToSheet() {
+  setSyncState('syncing', '保存中');
+  localStorage.setItem('reminder-tasks-v3', JSON.stringify(tasks));
+  try {
+    await fetch(GAS_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify({ tasks })
+    });
+    setSyncState('ok', '同期済み');
+  } catch {
+    setSyncState('error', '保存失敗');
+  }
 }
 
-function addTask() {
-  const inp = document.getElementById('task-input');
+function scheduleSave() {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(saveToSheet, 800);
+}
+
+// ── シート開閉 ─────────────────────────────
+function toggleSheet() {
+  sheetOpen ? closeSheet() : openSheet();
+}
+
+function openSheet() {
+  sheetOpen = true;
+  document.getElementById('input-sheet').classList.add('open');
+  document.getElementById('overlay').classList.add('open');
+  document.getElementById('fab').classList.add('open');
+  setTimeout(() => document.getElementById('new-task-input').focus(), 300);
+}
+
+function closeSheet() {
+  sheetOpen = false;
+  document.getElementById('input-sheet').classList.remove('open');
+  document.getElementById('overlay').classList.remove('open');
+  document.getElementById('fab').classList.remove('open');
+  document.getElementById('new-task-input').value = '';
+  document.getElementById('save-btn').disabled = true;
+}
+
+function updateSaveBtn() {
+  const val = document.getElementById('new-task-input').value.trim();
+  document.getElementById('save-btn').disabled = !val;
+}
+
+function saveTask() {
+  const inp  = document.getElementById('new-task-input');
   const text = inp.value.trim();
   if (!text) return;
   tasks.unshift({ id: Date.now(), text, done: false });
-  inp.value = '';
-  updateAddBtn();
-  save(); render();
+  closeSheet();
+  render();
+  scheduleSave();
 }
 
+// ── タスク操作 ─────────────────────────────
 function toggleTask(id) {
   const t = tasks.find(t => t.id === id);
-  if (t) { t.done = !t.done; save(); render(); }
+  if (t) { t.done = !t.done; render(); scheduleSave(); }
 }
 
-function deleteTask(id) {
+function deleteTask(id, e) {
+  e.stopPropagation();
   tasks = tasks.filter(t => t.id !== id);
-  save(); render();
-}
-
-function clearDone() {
-  tasks = tasks.filter(t => !t.done);
-  save(); render();
+  render(); scheduleSave();
 }
 
 function setFilter(val, btn) {
   currentFilter = val;
-  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
   render();
 }
@@ -395,58 +479,62 @@ function esc(s) {
   return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
+// ── レンダリング ───────────────────────────
 function render() {
-  const activeCount = tasks.filter(t => !t.done).length;
-  const doneCount   = tasks.filter(t =>  t.done).length;
+  const main = document.getElementById('main');
+  main.innerHTML = '';
 
-  document.getElementById('count-label').textContent =
-    activeCount > 0 ? `残り ${activeCount} 件` :
-    tasks.length > 0 ? 'すべて完了！ 🎉' : '';
+  const active = tasks.filter(t => !t.done);
+  const done   = tasks.filter(t =>  t.done);
 
-  const filtered = tasks.filter(t =>
-    currentFilter === 'active' ? !t.done :
-    currentFilter === 'done'   ?  t.done : true
-  );
+  let filtered;
+  if (currentFilter === 'active')     filtered = { active, done: [] };
+  else if (currentFilter === 'done')  filtered = { active: [], done };
+  else                                filtered = { active, done };
 
-  const list = document.getElementById('task-list');
-  // タスク行だけ削除（#empty-msgは残す）
-  [...list.children].forEach(c => { if (c.id !== 'empty-msg') c.remove(); });
-
-  const emptyMsg = document.getElementById('empty-msg');
-  if (filtered.length === 0) {
-    emptyMsg.style.display = 'block';
-    emptyMsg.textContent =
-      currentFilter === 'done'   ? '完了したタスクはありません' :
-      currentFilter === 'active' ? '未完了のタスクはありません 🎉' :
-      'タスクを追加してみましょう';
-  } else {
-    emptyMsg.style.display = 'none';
-    filtered.forEach(task => {
-      const div = document.createElement('div');
-      div.className = 'task-item';
-      div.innerHTML = `
-        <button class="check-btn" onclick="toggleTask(${task.id})">
-          ${task.done
-            ? `<svg width="22" height="22" viewBox="0 0 22 22"><circle cx="11" cy="11" r="10" fill="#34C759"/><path d="M6.5 11L9.5 14L15.5 8" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>`
-            : `<svg width="22" height="22" viewBox="0 0 22 22"><circle cx="11" cy="11" r="10" fill="none" stroke="#C7C7CC" stroke-width="1.5"/></svg>`
-          }
-        </button>
-        <span class="task-text${task.done ? ' done' : ''}">${esc(task.text)}</span>
-        <button class="delete-btn" onclick="deleteTask(${task.id})">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#FF3B30" stroke-width="2" stroke-linecap="round"><polyline points="3,6 5,6 21,6"/><path d="M19,6l-1,14H6L5,6"/><path d="M10,11v6M14,11v6"/><path d="M9,6V4h6v2"/></svg>
-        </button>`;
-      list.appendChild(div);
-    });
+  if (filtered.active.length === 0 && filtered.done.length === 0) {
+    const msg = document.createElement('div');
+    msg.id = 'empty-msg';
+    msg.textContent =
+      currentFilter === 'done'   ? '完了済みのタスクはありません' :
+      currentFilter === 'active' ? 'タスクを追加してみましょう' :
+      'タスクがありません';
+    main.appendChild(msg);
+    return;
   }
 
-  const clearBtn = document.getElementById('clear-done-btn');
-  clearBtn.style.display = doneCount > 0 && currentFilter !== 'active' ? 'block' : 'none';
-  if (doneCount > 0) clearBtn.textContent = `完了済みを削除（${doneCount}件）`;
+  // 未完了
+  filtered.active.forEach(task => main.appendChild(makeTaskEl(task)));
+
+  // 完了済み
+  if (filtered.done.length > 0) {
+    if (currentFilter === 'all') {
+      const hdr = document.createElement('div');
+      hdr.className = 'section-header';
+      hdr.textContent = `完了済み（${filtered.done.length}）`;
+      main.appendChild(hdr);
+    }
+    filtered.done.forEach(task => main.appendChild(makeTaskEl(task)));
+  }
 }
 
-function updateAddBtn() {
-  const val = document.getElementById('task-input').value.trim();
-  document.getElementById('add-btn').classList.toggle('active', val.length > 0);
+function makeTaskEl(task) {
+  const div = document.createElement('div');
+  div.className = 'task-item';
+  div.onclick = () => toggleTask(task.id);
+  div.innerHTML = `
+    <div class="check-wrap">
+      <div class="check-circle ${task.done ? 'done' : ''}">
+        ${task.done ? `<svg width="12" height="12" viewBox="0 0 24 24" fill="white"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>` : ''}
+      </div>
+    </div>
+    <div class="task-body">
+      <div class="task-text ${task.done ? 'done' : ''}">${esc(task.text)}</div>
+    </div>
+    <button class="delete-btn" onclick="deleteTask(${task.id}, event)">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="#bdc1c6"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+    </button>`;
+  return div;
 }
 
 // ── コピー ─────────────────────────────────
@@ -454,20 +542,14 @@ function copyTasks() {
   if (tasks.length === 0) { showToast('タスクがありません'); return; }
   const active = tasks.filter(t => !t.done);
   const done   = tasks.filter(t =>  t.done);
-  let text = '【リマインダー】\n';
+  let text = '【ToDoリスト】\n';
   if (active.length) { text += '\n▼ 未完了\n'; active.forEach((t,i) => text += `${i+1}. ${t.text}\n`); }
   if (done.length)   { text += '\n▼ 完了済み\n'; done.forEach((t,i) => text += `${i+1}. ${t.text}\n`); }
 
-  const copy = (t) => {
-    showToast('コピーしました！Claudeに貼り付けてね ✨');
-    const btn = document.getElementById('copy-btn');
-    btn.classList.add('copied');
-    setTimeout(() => btn.classList.remove('copied'), 2000);
-  };
-
+  const onCopy = () => showToast('コピーしました！Claudeに貼り付けてね ✨');
   if (navigator.clipboard) {
-    navigator.clipboard.writeText(text).then(copy).catch(() => fallbackCopy(text, copy));
-  } else { fallbackCopy(text, copy); }
+    navigator.clipboard.writeText(text).then(onCopy).catch(() => fallbackCopy(text, onCopy));
+  } else { fallbackCopy(text, onCopy); }
 }
 
 function fallbackCopy(text, cb) {
@@ -482,60 +564,30 @@ function fallbackCopy(text, cb) {
 }
 
 // ── Toast ──────────────────────────────────
+let toastTimer;
 function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2500);
-}
-
-// ── Claude連携 ─────────────────────────────
-function toggleClaude() {
-  const panel = document.getElementById('claude-panel');
-  const btn   = document.getElementById('claude-btn');
-  const open  = panel.classList.toggle('open');
-  btn.classList.toggle('active', open);
-}
-
-async function askClaude() {
-  const inp  = document.getElementById('claude-input');
-  const btn  = document.getElementById('claude-ask-btn');
-  const resp = document.getElementById('claude-response');
-  const q    = inp.value.trim();
-
-  if (!q && tasks.length === 0) { showToast('タスクを追加してから相談してね'); return; }
-
-  btn.disabled = true; btn.textContent = '…';
-  resp.style.display = 'none';
-
-  const list = tasks.map((t,i) => `${i+1}. [${t.done?'完了':'未完了'}] ${t.text}`).join('\n');
-  const msg  = q
-    ? `${q}\n\n現在のタスク一覧:\n${list || '（なし）'}`
-    : `以下のタスク一覧を整理・優先度付けして、簡潔にアドバイスをください（3〜5文で）。\n\n${list}`;
-
-  try {
-    const res  = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
-        system: 'あなたはシンプルで前向きなタスク管理アシスタントです。簡潔・実用的・温かいトーンで日本語で返答してください。',
-        messages: [{ role: 'user', content: msg }]
-      })
-    });
-    const data = await res.json();
-    resp.textContent = data.content?.find(b => b.type==='text')?.text || 'うまく取得できませんでした。';
-  } catch {
-    resp.textContent = '通信エラーが発生しました。もう一度お試しください。';
+  let t = document.getElementById('toast');
+  if (!t) {
+    t = document.createElement('div');
+    t.id = 'toast';
+    t.style.cssText = `position:fixed;bottom:110px;left:50%;transform:translateX(-50%) translateY(10px);
+      background:rgba(40,40,40,0.92);color:white;padding:10px 20px;border-radius:20px;
+      font-size:14px;font-weight:500;opacity:0;transition:all 0.25s;pointer-events:none;
+      white-space:nowrap;z-index:100;font-family:-apple-system,sans-serif;`;
+    document.body.appendChild(t);
   }
-
-  resp.style.display = 'block';
-  btn.disabled = false; btn.textContent = '聞く';
-  inp.value = '';
+  t.textContent = msg;
+  t.style.opacity = '1';
+  t.style.transform = 'translateX(-50%) translateY(0)';
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => {
+    t.style.opacity = '0';
+    t.style.transform = 'translateX(-50%) translateY(10px)';
+  }, 2500);
 }
 
-load();
+// ── 起動 ───────────────────────────────────
+loadFromSheet();
 </script>
 </body>
 </html>
