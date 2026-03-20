@@ -32,88 +32,43 @@ body {
   background: #fff;
   z-index: 20;
 }
-
 #header-left { display: flex; align-items: center; gap: 12px; }
-
-#menu-btn {
-  background: none; border: none; cursor: pointer; padding: 4px; line-height: 0;
-  color: #5f6368;
-}
-
-#app-title {
-  font-size: 18px;
-  font-weight: 400;
-  color: #202124;
-}
+#menu-btn { background: none; border: none; cursor: pointer; padding: 4px; line-height: 0; color: #5f6368; }
+#app-title { font-size: 18px; font-weight: 400; color: #202124; }
 
 #sync-pill {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 12px;
-  color: #9aa0a6;
-  padding: 3px 8px;
-  border-radius: 12px;
-  background: #f8f9fa;
+  display: flex; align-items: center; gap: 5px;
+  font-size: 12px; color: #9aa0a6;
+  padding: 3px 8px; border-radius: 12px; background: #f8f9fa;
   transition: all 0.3s;
 }
 #sync-pill.syncing { color: #fbbc04; background: #fef9e7; }
 #sync-pill.ok { color: #34a853; background: #e6f4ea; }
 #sync-pill.error { color: #ea4335; background: #fce8e6; }
-
-#sync-dot {
-  width: 6px; height: 6px; border-radius: 50%;
-  background: #9aa0a6; flex-shrink: 0; transition: background 0.3s;
-}
+#sync-dot { width: 6px; height: 6px; border-radius: 50%; background: #9aa0a6; flex-shrink: 0; transition: background 0.3s; }
 #sync-pill.syncing #sync-dot { background: #fbbc04; animation: blink 1s infinite; }
 #sync-pill.ok #sync-dot { background: #34a853; }
 #sync-pill.error #sync-dot { background: #ea4335; }
 @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
 
 #copy-btn {
-  background: none;
-  border: 1px solid #dadce0;
-  border-radius: 20px;
-  padding: 6px 12px;
-  font-size: 12px;
-  font-weight: 500;
-  color: #5f6368;
-  cursor: pointer;
-  font-family: inherit;
-  display: flex;
-  align-items: center;
-  gap: 5px;
+  background: none; border: 1px solid #dadce0; border-radius: 20px;
+  padding: 6px 12px; font-size: 12px; font-weight: 500; color: #5f6368;
+  cursor: pointer; font-family: inherit; display: flex; align-items: center; gap: 5px;
 }
 #copy-btn:active { background: #f1f3f4; }
 
 /* ── Tabs ── */
-#tabs {
-  display: flex;
-  border-bottom: 1px solid #e0e0e0;
-  padding: 0 20px;
-}
-
+#tabs { display: flex; border-bottom: 1px solid #e0e0e0; padding: 0 20px; }
 .tab-btn {
-  padding: 12px 16px;
-  font-size: 14px;
-  font-weight: 500;
-  color: #5f6368;
-  background: none;
-  border: none;
-  border-bottom: 3px solid transparent;
-  cursor: pointer;
-  font-family: inherit;
-  transition: all 0.15s;
-  white-space: nowrap;
+  padding: 12px 16px; font-size: 14px; font-weight: 500; color: #5f6368;
+  background: none; border: none; border-bottom: 3px solid transparent;
+  cursor: pointer; font-family: inherit; transition: all 0.15s; white-space: nowrap;
 }
 .tab-btn.active { color: #1a73e8; border-bottom-color: #1a73e8; }
 
 /* ── Task list ── */
-#main {
-  padding: 0 0 120px;
-  max-width: 600px;
-  margin: 0 auto;
-}
+#main { padding: 0 0 120px; max-width: 600px; margin: 0 auto; }
 
 .task-item {
   display: flex;
@@ -121,30 +76,59 @@ body {
   padding: 14px 20px;
   border-bottom: 1px solid #f1f3f4;
   gap: 14px;
-  transition: background 0.1s;
+  background: #fff;
+  transition: background 0.1s, opacity 0.15s, box-shadow 0.15s;
+  cursor: default;
+  user-select: none;
+  -webkit-user-select: none;
+  position: relative;
 }
-.task-item:active { background: #f8f9fa; }
+.task-item.dragging {
+  opacity: 0.5;
+}
+.task-item.drag-over {
+  background: #e8f0fe;
+}
+.task-item.completing {
+  opacity: 0.6;
+}
+
+/* drag handle */
+.drag-handle {
+  display: flex;
+  align-items: center;
+  padding: 2px 4px 0 0;
+  cursor: grab;
+  color: #dadce0;
+  flex-shrink: 0;
+  touch-action: none;
+}
+.drag-handle:active { cursor: grabbing; }
 
 .check-circle {
-  width: 20px; height: 20px;
+  width: 22px; height: 22px;
   border-radius: 50%;
   border: 2px solid #bdc1c6;
   background: none;
   display: flex; align-items: center; justify-content: center;
-  transition: all 0.2s;
+  transition: all 0.25s;
   cursor: pointer;
   flex-shrink: 0;
-  margin-top: 2px;
+  margin-top: 1px;
 }
-.check-circle.done { background: #1a73e8; border-color: #1a73e8; }
+.check-circle:active { transform: scale(0.9); }
+.check-circle.checking {
+  border-color: #1a73e8;
+  background: #e8f0fe;
+}
+.check-circle.done {
+  background: #1a73e8;
+  border-color: #1a73e8;
+}
 
 .task-body { flex: 1; min-width: 0; }
-
 .task-text {
-  font-size: 16px;
-  color: #202124;
-  line-height: 1.5;
-  word-break: break-all;
+  font-size: 16px; color: #202124; line-height: 1.5; word-break: break-all;
 }
 .task-text.done { color: #bdc1c6; text-decoration: line-through; }
 
@@ -154,8 +138,7 @@ body {
   opacity: 0; transition: opacity 0.15s;
   flex-shrink: 0; line-height: 0; margin-top: 2px;
 }
-.task-item:hover .delete-btn,
-.task-item:active .delete-btn { opacity: 1; }
+.task-item:hover .delete-btn { opacity: 1; }
 
 .section-header {
   padding: 16px 20px 8px;
@@ -171,117 +154,81 @@ body {
 #fab {
   position: fixed;
   bottom: max(28px, env(safe-area-inset-bottom, 28px));
-  left: 50%;
-  transform: translateX(-50%);
-  width: 56px; height: 56px;
-  border-radius: 50%;
-  background: #1a73e8;
-  color: white;
-  border: none;
-  cursor: pointer;
+  left: 50%; transform: translateX(-50%);
+  width: 56px; height: 56px; border-radius: 50%;
+  background: #1a73e8; color: white; border: none; cursor: pointer;
   box-shadow: 0 4px 12px rgba(26,115,232,0.4);
   display: flex; align-items: center; justify-content: center;
-  z-index: 30;
-  transition: transform 0.2s, background 0.2s, box-shadow 0.2s;
-  padding-bottom: 0;
+  z-index: 30; transition: transform 0.2s, background 0.2s, box-shadow 0.2s;
 }
 #fab:active { transform: translateX(-50%) scale(0.93); }
-#fab.open {
-  background: #5f6368;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-}
+#fab.open { background: #5f6368; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
 
-/* ── モーダルオーバーレイ ── */
+/* ── Overlay ── */
 #overlay {
-  position: fixed; inset: 0;
-  background: rgba(0,0,0,0.4);
-  z-index: 40;
-  opacity: 0; pointer-events: none;
-  transition: opacity 0.25s;
+  position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 40;
+  opacity: 0; pointer-events: none; transition: opacity 0.25s;
 }
 #overlay.open { opacity: 1; pointer-events: auto; }
 
-/* ── 入力モーダル（中央配置） ── */
+/* ── Input modal ── */
 #input-modal {
-  position: fixed;
-  /* キーボードが出たとき上部1/3あたりに来るよう上から配置 */
-  top: 20%;
-  left: 50%;
+  position: fixed; top: 20%; left: 50%;
   transform: translateX(-50%) translateY(-20px);
-  width: calc(100% - 40px);
-  max-width: 500px;
-  background: #fff;
-  border-radius: 16px;
-  padding: 24px 20px 20px;
-  z-index: 50;
-  opacity: 0;
-  pointer-events: none;
+  width: calc(100% - 40px); max-width: 500px;
+  background: #fff; border-radius: 16px; padding: 24px 20px 20px;
+  z-index: 50; opacity: 0; pointer-events: none;
   transition: opacity 0.2s, transform 0.2s;
   box-shadow: 0 8px 32px rgba(0,0,0,0.18);
 }
-#input-modal.open {
-  opacity: 1;
-  pointer-events: auto;
-  transform: translateX(-50%) translateY(0);
-}
-
-#input-modal-label {
-  font-size: 12px;
-  font-weight: 500;
-  color: #1a73e8;
-  letter-spacing: 0.05em;
-  margin-bottom: 12px;
-}
-
+#input-modal.open { opacity: 1; pointer-events: auto; transform: translateX(-50%) translateY(0); }
+#input-modal-label { font-size: 12px; font-weight: 500; color: #1a73e8; letter-spacing: 0.05em; margin-bottom: 12px; }
 #new-task-input {
-  width: 100%;
-  border: none;
-  outline: none;
-  font-size: 18px;
-  color: #202124;
-  font-family: inherit;
-  padding: 0;
-  background: transparent;
-  caret-color: #1a73e8;
-  line-height: 1.5;
+  width: 100%; border: none; outline: none; font-size: 18px; color: #202124;
+  font-family: inherit; padding: 0; background: transparent; caret-color: #1a73e8; line-height: 1.5;
 }
 #new-task-input::placeholder { color: #bdc1c6; }
-
-#input-divider {
-  height: 1px;
-  background: #e0e0e0;
-  margin: 14px 0;
-}
+#input-divider { height: 1px; background: #e0e0e0; margin: 14px 0; }
 #input-divider.active { background: #1a73e8; }
-
-#input-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-}
-
+#input-actions { display: flex; justify-content: flex-end; gap: 8px; }
 .input-action-btn {
-  padding: 8px 20px;
-  border-radius: 20px;
-  border: none;
-  font-size: 14px;
-  font-weight: 500;
-  cursor: pointer;
-  font-family: inherit;
-  transition: background 0.15s;
+  padding: 8px 20px; border-radius: 20px; border: none;
+  font-size: 14px; font-weight: 500; cursor: pointer; font-family: inherit; transition: background 0.15s;
 }
-
 #cancel-btn { background: none; color: #5f6368; }
 #cancel-btn:hover { background: #f1f3f4; }
-
 #save-btn { background: #1a73e8; color: white; }
 #save-btn:hover { background: #1557b0; }
 #save-btn:disabled { background: #e0e0e0; color: #9aa0a6; cursor: default; }
+
+/* ── Context menu ── */
+#context-menu {
+  position: fixed;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.18);
+  padding: 6px 0;
+  z-index: 200;
+  min-width: 180px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s;
+}
+#context-menu.open { opacity: 1; pointer-events: auto; }
+
+.context-menu-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 16px;
+  font-size: 15px; color: #202124;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+.context-menu-item:hover { background: #f1f3f4; }
+.context-menu-item:active { background: #e8f0fe; }
 </style>
 </head>
 <body>
 
-<!-- Header -->
 <div id="header">
   <div id="header-left">
     <button id="menu-btn">
@@ -290,10 +237,7 @@ body {
     <span id="app-title">ToDo リスト</span>
   </div>
   <div style="display:flex;align-items:center;gap:8px;">
-    <div id="sync-pill">
-      <div id="sync-dot"></div>
-      <span id="sync-text">読込中</span>
-    </div>
+    <div id="sync-pill"><div id="sync-dot"></div><span id="sync-text">読込中</span></div>
     <button id="copy-btn" onclick="copyTasks()">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
       コピー
@@ -301,27 +245,20 @@ body {
   </div>
 </div>
 
-<!-- Tabs -->
 <div id="tabs">
   <button class="tab-btn active" onclick="setFilter('active',this)">マイタスク</button>
   <button class="tab-btn" onclick="setFilter('done',this)">完了済み</button>
   <button class="tab-btn" onclick="setFilter('all',this)">すべて</button>
 </div>
 
-<!-- Task list -->
-<div id="main">
-  <div id="empty-msg">タスクを追加してみましょう</div>
-</div>
+<div id="main"><div id="empty-msg">読み込み中…</div></div>
 
-<!-- Overlay -->
 <div id="overlay" onclick="closeModal()"></div>
 
-<!-- FAB -->
 <button id="fab" onclick="openModal()">
   <svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
 </button>
 
-<!-- Input modal -->
 <div id="input-modal">
   <div id="input-modal-label">新しいタスク</div>
   <input id="new-task-input" type="text" placeholder="タスクを入力…"
@@ -336,41 +273,63 @@ body {
   </div>
 </div>
 
+<!-- Context menu -->
+<div id="context-menu">
+  <div class="context-menu-item" onclick="consultClaude()">
+    <svg width="18" height="18" viewBox="0 0 24 24"><path d="M12 2L13.5 9L20 10.5L13.5 12L12 19L10.5 12L4 10.5L10.5 9Z" fill="#FF9500"/></svg>
+    Claudeに相談
+  </div>
+  <div class="context-menu-item" onclick="deleteFromContext()">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#ea4335" stroke-width="2" stroke-linecap="round"><polyline points="3,6 5,6 21,6"/><path d="M19,6l-1,14H6L5,6"/><path d="M10,11v6M14,11v6"/><path d="M9,6V4h6v2"/></svg>
+    削除
+  </div>
+</div>
+
 <script>
 const GAS_URL = 'https://script.google.com/macros/s/AKfycbzNEngb5IkUpSj5FDNVuuRYPNxuKugjkc0naqItiofhE_qMWfr9QBFA_4WDAGOek_UU/exec';
+const LS_KEY  = 'reminder-tasks-v3';
 
 let tasks = [];
 let currentFilter = 'active';
 let saveTimer = null;
+let contextTaskId = null;
+
+// ── ストレージ ─────────────────────────────
+function lsLoad() {
+  try { const r = localStorage.getItem(LS_KEY); return r ? JSON.parse(r) : null; } catch { return null; }
+}
+function lsSave() {
+  localStorage.setItem(LS_KEY, JSON.stringify(tasks));
+}
 
 // ── 同期 ───────────────────────────────────
 function setSyncState(state, text) {
-  const pill = document.getElementById('sync-pill');
-  const tx   = document.getElementById('sync-text');
-  pill.className = state;
-  tx.textContent = text;
+  document.getElementById('sync-pill').className = state;
+  document.getElementById('sync-text').textContent = text;
 }
 
 async function loadFromSheet() {
-  setSyncState('syncing', '読込中');
+  // まずlocalStorageから即表示
+  const cached = lsLoad();
+  if (cached) { tasks = cached; render(); }
+
+  setSyncState('syncing', '同期中');
   try {
     const res  = await fetch(GAS_URL + '?t=' + Date.now());
     const data = await res.json();
     tasks = data;
+    lsSave();
     setSyncState('ok', '同期済み');
+    render();
   } catch {
     setSyncState('error', 'オフライン');
-    try {
-      const raw = localStorage.getItem('reminder-tasks-v3');
-      tasks = raw ? JSON.parse(raw) : [];
-    } catch { tasks = []; }
+    if (!cached) { tasks = []; render(); }
   }
-  render();
 }
 
 async function saveToSheet() {
   setSyncState('syncing', '保存中');
-  localStorage.setItem('reminder-tasks-v3', JSON.stringify(tasks));
+  lsSave();
   try {
     await fetch(GAS_URL, {
       method: 'POST',
@@ -393,11 +352,8 @@ function openModal() {
   document.getElementById('input-modal').classList.add('open');
   document.getElementById('overlay').classList.add('open');
   document.getElementById('fab').classList.add('open');
-  // 即フォーカス（キーボードを即座に開く）
-  const inp = document.getElementById('new-task-input');
-  inp.focus();
+  setTimeout(() => document.getElementById('new-task-input').focus(), 50);
 }
-
 function closeModal() {
   document.getElementById('input-modal').classList.remove('open');
   document.getElementById('overlay').classList.remove('open');
@@ -405,12 +361,9 @@ function closeModal() {
   document.getElementById('new-task-input').value = '';
   document.getElementById('save-btn').disabled = true;
 }
-
 function updateSaveBtn() {
-  const val = document.getElementById('new-task-input').value.trim();
-  document.getElementById('save-btn').disabled = !val;
+  document.getElementById('save-btn').disabled = !document.getElementById('new-task-input').value.trim();
 }
-
 function saveTask() {
   const inp  = document.getElementById('new-task-input');
   const text = inp.value.trim();
@@ -424,11 +377,25 @@ function saveTask() {
 // ── タスク操作 ─────────────────────────────
 function toggleTask(id) {
   const t = tasks.find(t => t.id === id);
-  if (t) { t.done = !t.done; render(); scheduleSave(); }
+  if (!t) return;
+
+  // アニメーション: checking → 少し待つ → done → 移動
+  const el = document.querySelector(`[data-id="${id}"] .check-circle`);
+  if (el && !t.done) {
+    el.classList.add('checking');
+    setTimeout(() => {
+      t.done = true;
+      render();
+      scheduleSave();
+    }, 350);
+  } else {
+    t.done = !t.done;
+    render();
+    scheduleSave();
+  }
 }
 
-function deleteTask(id, e) {
-  e.stopPropagation();
+function deleteTask(id) {
   tasks = tasks.filter(t => t.id !== id);
   render(); scheduleSave();
 }
@@ -478,23 +445,172 @@ function render() {
     }
     showDone.forEach(task => main.appendChild(makeTaskEl(task)));
   }
+
+  initDragAndDrop();
 }
 
 function makeTaskEl(task) {
   const div = document.createElement('div');
   div.className = 'task-item';
-  div.onclick = () => toggleTask(task.id);
+  div.dataset.id = task.id;
+  div.draggable = true;
+
   div.innerHTML = `
+    <div class="drag-handle" title="ドラッグで並び替え">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M9 5a2 2 0 110-4 2 2 0 010 4zm0 7a2 2 0 110-4 2 2 0 010 4zm0 7a2 2 0 110-4 2 2 0 010 4zm6-14a2 2 0 110-4 2 2 0 010 4zm0 7a2 2 0 110-4 2 2 0 010 4zm0 7a2 2 0 110-4 2 2 0 010 4z"/></svg>
+    </div>
     <div class="check-circle ${task.done ? 'done' : ''}">
-      ${task.done ? `<svg width="12" height="12" viewBox="0 0 24 24" fill="white"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>` : ''}
+      ${task.done ? `<svg width="13" height="13" viewBox="0 0 24 24" fill="white"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>` : ''}
     </div>
     <div class="task-body">
       <div class="task-text ${task.done ? 'done' : ''}">${esc(task.text)}</div>
     </div>
-    <button class="delete-btn" onclick="deleteTask(${task.id}, event)">
+    <button class="delete-btn" data-del="${task.id}">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="#bdc1c6"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
     </button>`;
+
+  // 丸ボタンのみで完了
+  div.querySelector('.check-circle').addEventListener('click', e => {
+    e.stopPropagation();
+    toggleTask(task.id);
+  });
+
+  // 削除ボタン
+  div.querySelector('.delete-btn').addEventListener('click', e => {
+    e.stopPropagation();
+    deleteTask(task.id);
+  });
+
+  // 長押し（モバイル）
+  let longPressTimer;
+  div.addEventListener('touchstart', e => {
+    longPressTimer = setTimeout(() => {
+      showContextMenu(task.id, e.touches[0].clientX, e.touches[0].clientY);
+    }, 600);
+  }, { passive: true });
+  div.addEventListener('touchend',   () => clearTimeout(longPressTimer));
+  div.addEventListener('touchmove',  () => clearTimeout(longPressTimer));
+
+  // 右クリック（Mac）
+  div.addEventListener('contextmenu', e => {
+    e.preventDefault();
+    showContextMenu(task.id, e.clientX, e.clientY);
+  });
+
   return div;
+}
+
+// ── コンテキストメニュー ───────────────────
+function showContextMenu(taskId, x, y) {
+  contextTaskId = taskId;
+  const menu = document.getElementById('context-menu');
+  menu.style.left = Math.min(x, window.innerWidth - 200) + 'px';
+  menu.style.top  = Math.min(y, window.innerHeight - 120) + 'px';
+  menu.classList.add('open');
+  setTimeout(() => document.addEventListener('click', closeContextMenu, { once: true }), 10);
+}
+
+function closeContextMenu() {
+  document.getElementById('context-menu').classList.remove('open');
+}
+
+function consultClaude() {
+  closeContextMenu();
+  const t = tasks.find(t => t.id === contextTaskId);
+  if (!t) return;
+  const prompt = encodeURIComponent(`以下のタスクを進めるために、具体的なアドバイスや手順を教えてください：\n\n「${t.text}」`);
+  window.open(`https://claude.ai/new?q=${prompt}`, '_blank');
+}
+
+function deleteFromContext() {
+  closeContextMenu();
+  if (contextTaskId) deleteTask(contextTaskId);
+}
+
+// ── ドラッグ＆ドロップ並び替え ─────────────
+let dragSrcId = null;
+
+function initDragAndDrop() {
+  const items = document.querySelectorAll('.task-item');
+
+  items.forEach(item => {
+    // デスクトップ drag
+    item.addEventListener('dragstart', e => {
+      dragSrcId = parseInt(item.dataset.id);
+      item.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+    });
+    item.addEventListener('dragend', () => {
+      item.classList.remove('dragging');
+      document.querySelectorAll('.task-item').forEach(i => i.classList.remove('drag-over'));
+    });
+    item.addEventListener('dragover', e => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'move';
+      document.querySelectorAll('.task-item').forEach(i => i.classList.remove('drag-over'));
+      item.classList.add('drag-over');
+    });
+    item.addEventListener('drop', e => {
+      e.preventDefault();
+      item.classList.remove('drag-over');
+      const targetId = parseInt(item.dataset.id);
+      if (dragSrcId && dragSrcId !== targetId) {
+        reorderTasks(dragSrcId, targetId);
+      }
+    });
+
+    // モバイル touch drag（ハンドルのみ）
+    const handle = item.querySelector('.drag-handle');
+    if (handle) {
+      handle.addEventListener('touchstart', e => {
+        e.stopPropagation();
+        initTouchDrag(item, e);
+      }, { passive: true });
+    }
+  });
+}
+
+function reorderTasks(srcId, tgtId) {
+  const srcIdx = tasks.findIndex(t => t.id === srcId);
+  const tgtIdx = tasks.findIndex(t => t.id === tgtId);
+  if (srcIdx === -1 || tgtIdx === -1) return;
+  const [moved] = tasks.splice(srcIdx, 1);
+  tasks.splice(tgtIdx, 0, moved);
+  render();
+  scheduleSave();
+}
+
+// タッチドラッグ
+function initTouchDrag(item, startEvent) {
+  const touch0 = startEvent.touches[0];
+  const startY = touch0.clientY;
+  const items  = () => Array.from(document.querySelectorAll('.task-item'));
+  item.classList.add('dragging');
+  let lastOver = null;
+
+  function onMove(e) {
+    const t = e.touches[0];
+    const el = document.elementFromPoint(t.clientX, t.clientY);
+    const target = el ? el.closest('.task-item') : null;
+    if (target && target !== item) {
+      items().forEach(i => i.classList.remove('drag-over'));
+      target.classList.add('drag-over');
+      lastOver = target;
+    }
+  }
+
+  function onEnd() {
+    item.classList.remove('dragging');
+    items().forEach(i => i.classList.remove('drag-over'));
+    if (lastOver && lastOver !== item) {
+      reorderTasks(parseInt(item.dataset.id), parseInt(lastOver.dataset.id));
+    }
+    document.removeEventListener('touchmove', onMove);
+    document.removeEventListener('touchend', onEnd);
+  }
+
+  document.addEventListener('touchmove', onMove, { passive: true });
+  document.addEventListener('touchend', onEnd);
 }
 
 // ── コピー ─────────────────────────────────
@@ -505,22 +621,15 @@ function copyTasks() {
   let text = '【ToDoリスト】\n';
   if (active.length) { text += '\n▼ 未完了\n'; active.forEach((t,i) => text += `${i+1}. ${t.text}\n`); }
   if (done.length)   { text += '\n▼ 完了済み\n'; done.forEach((t,i) => text += `${i+1}. ${t.text}\n`); }
-
-  const onCopy = () => showToast('コピーしました！Claudeに貼り付けてね ✨');
-  if (navigator.clipboard) {
-    navigator.clipboard.writeText(text).then(onCopy).catch(() => fallbackCopy(text, onCopy));
-  } else { fallbackCopy(text, onCopy); }
+  const cb = () => showToast('コピーしました！Claudeに貼り付けてね ✨');
+  if (navigator.clipboard) navigator.clipboard.writeText(text).then(cb).catch(() => fallbackCopy(text, cb));
+  else fallbackCopy(text, cb);
 }
-
 function fallbackCopy(text, cb) {
   const ta = document.createElement('textarea');
-  ta.value = text;
-  ta.style.cssText = 'position:fixed;opacity:0;top:0;left:0';
-  document.body.appendChild(ta);
-  ta.focus(); ta.select();
-  document.execCommand('copy');
-  document.body.removeChild(ta);
-  cb();
+  ta.value = text; ta.style.cssText = 'position:fixed;opacity:0;top:0;left:0';
+  document.body.appendChild(ta); ta.focus(); ta.select();
+  document.execCommand('copy'); document.body.removeChild(ta); cb();
 }
 
 // ── Toast ──────────────────────────────────
@@ -528,8 +637,7 @@ let toastTimer;
 function showToast(msg) {
   let t = document.getElementById('_toast');
   if (!t) {
-    t = document.createElement('div');
-    t.id = '_toast';
+    t = document.createElement('div'); t.id = '_toast';
     t.style.cssText = `position:fixed;bottom:110px;left:50%;transform:translateX(-50%) translateY(10px);
       background:rgba(40,40,40,0.92);color:white;padding:10px 20px;border-radius:20px;
       font-size:14px;font-weight:500;opacity:0;transition:all 0.25s;pointer-events:none;
@@ -537,12 +645,10 @@ function showToast(msg) {
     document.body.appendChild(t);
   }
   t.textContent = msg;
-  t.style.opacity = '1';
-  t.style.transform = 'translateX(-50%) translateY(0)';
+  t.style.opacity = '1'; t.style.transform = 'translateX(-50%) translateY(0)';
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => {
-    t.style.opacity = '0';
-    t.style.transform = 'translateX(-50%) translateY(10px)';
+    t.style.opacity = '0'; t.style.transform = 'translateX(-50%) translateY(10px)';
   }, 2500);
 }
 
