@@ -44,7 +44,6 @@ body {
   font-size: 18px;
   font-weight: 400;
   color: #202124;
-  letter-spacing: 0;
 }
 
 #sync-pill {
@@ -71,12 +70,27 @@ body {
 #sync-pill.error #sync-dot { background: #ea4335; }
 @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
 
+#copy-btn {
+  background: none;
+  border: 1px solid #dadce0;
+  border-radius: 20px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #5f6368;
+  cursor: pointer;
+  font-family: inherit;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+#copy-btn:active { background: #f1f3f4; }
+
 /* ── Tabs ── */
 #tabs {
   display: flex;
   border-bottom: 1px solid #e0e0e0;
   padding: 0 20px;
-  gap: 0;
 }
 
 .tab-btn {
@@ -92,10 +106,7 @@ body {
   transition: all 0.15s;
   white-space: nowrap;
 }
-.tab-btn.active {
-  color: #1a73e8;
-  border-bottom-color: #1a73e8;
-}
+.tab-btn.active { color: #1a73e8; border-bottom-color: #1a73e8; }
 
 /* ── Task list ── */
 #main {
@@ -110,19 +121,9 @@ body {
   padding: 14px 20px;
   border-bottom: 1px solid #f1f3f4;
   gap: 14px;
-  cursor: pointer;
   transition: background 0.1s;
-  -webkit-user-select: none;
-  user-select: none;
 }
 .task-item:active { background: #f8f9fa; }
-
-.check-wrap {
-  flex-shrink: 0;
-  margin-top: 1px;
-  width: 20px; height: 20px;
-  position: relative;
-}
 
 .check-circle {
   width: 20px; height: 20px;
@@ -132,11 +133,10 @@ body {
   display: flex; align-items: center; justify-content: center;
   transition: all 0.2s;
   cursor: pointer;
+  flex-shrink: 0;
+  margin-top: 2px;
 }
-.check-circle.done {
-  background: #1a73e8;
-  border-color: #1a73e8;
-}
+.check-circle.done { background: #1a73e8; border-color: #1a73e8; }
 
 .task-body { flex: 1; min-width: 0; }
 
@@ -146,44 +146,28 @@ body {
   line-height: 1.5;
   word-break: break-all;
 }
-.task-text.done {
-  color: #bdc1c6;
-  text-decoration: line-through;
-}
+.task-text.done { color: #bdc1c6; text-decoration: line-through; }
 
 .delete-btn {
-  background: none;
-  border: none;
-  padding: 2px 4px;
-  cursor: pointer;
-  color: #bdc1c6;
-  opacity: 0;
-  transition: opacity 0.15s;
-  flex-shrink: 0;
-  line-height: 0;
-  margin-top: 1px;
+  background: none; border: none; padding: 2px 4px;
+  cursor: pointer; color: #bdc1c6;
+  opacity: 0; transition: opacity 0.15s;
+  flex-shrink: 0; line-height: 0; margin-top: 2px;
 }
-.task-item:hover .delete-btn { opacity: 1; }
+.task-item:hover .delete-btn,
 .task-item:active .delete-btn { opacity: 1; }
 
-/* 完了済みセクションヘッダー */
 .section-header {
   padding: 16px 20px 8px;
-  font-size: 13px;
-  font-weight: 500;
-  color: #5f6368;
-  letter-spacing: 0.01em;
+  font-size: 13px; font-weight: 500; color: #5f6368;
 }
 
 #empty-msg {
   padding: 60px 20px;
-  text-align: center;
-  color: #bdc1c6;
-  font-size: 15px;
-  line-height: 1.6;
+  text-align: center; color: #bdc1c6; font-size: 15px; line-height: 1.6;
 }
 
-/* ── FAB（中央下の+ボタン） ── */
+/* ── FAB ── */
 #fab {
   position: fixed;
   bottom: max(28px, env(safe-area-inset-bottom, 28px));
@@ -194,61 +178,81 @@ body {
   background: #1a73e8;
   color: white;
   border: none;
-  font-size: 28px;
   cursor: pointer;
   box-shadow: 0 4px 12px rgba(26,115,232,0.4);
   display: flex; align-items: center; justify-content: center;
   z-index: 30;
-  transition: transform 0.2s, box-shadow 0.2s;
-  line-height: 1;
-  padding-bottom: 1px;
+  transition: transform 0.2s, background 0.2s, box-shadow 0.2s;
+  padding-bottom: 0;
 }
-#fab:active {
-  transform: translateX(-50%) scale(0.93);
-  box-shadow: 0 2px 6px rgba(26,115,232,0.3);
+#fab:active { transform: translateX(-50%) scale(0.93); }
+#fab.open {
+  background: #5f6368;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
 }
-#fab.open { background: #5f6368; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
 
-/* ── 入力シート（下から出てくる） ── */
-#input-sheet {
+/* ── モーダルオーバーレイ ── */
+#overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.4);
+  z-index: 40;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.25s;
+}
+#overlay.open { opacity: 1; pointer-events: auto; }
+
+/* ── 入力モーダル（中央配置） ── */
+#input-modal {
   position: fixed;
-  bottom: 0; left: 0; right: 0;
+  /* キーボードが出たとき上部1/3あたりに来るよう上から配置 */
+  top: 20%;
+  left: 50%;
+  transform: translateX(-50%) translateY(-20px);
+  width: calc(100% - 40px);
+  max-width: 500px;
   background: #fff;
-  border-radius: 20px 20px 0 0;
-  box-shadow: 0 -4px 24px rgba(0,0,0,0.12);
-  padding: 20px 20px;
-  padding-bottom: max(24px, env(safe-area-inset-bottom));
-  z-index: 25;
-  transform: translateY(100%);
-  transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+  border-radius: 16px;
+  padding: 24px 20px 20px;
+  z-index: 50;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s, transform 0.2s;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.18);
 }
-#input-sheet.open { transform: translateY(0); }
+#input-modal.open {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(-50%) translateY(0);
+}
 
-#input-sheet-handle {
-  width: 36px; height: 4px;
-  background: #e0e0e0;
-  border-radius: 2px;
-  margin: 0 auto 16px;
+#input-modal-label {
+  font-size: 12px;
+  font-weight: 500;
+  color: #1a73e8;
+  letter-spacing: 0.05em;
+  margin-bottom: 12px;
 }
 
 #new-task-input {
   width: 100%;
   border: none;
   outline: none;
-  font-size: 16px;
+  font-size: 18px;
   color: #202124;
   font-family: inherit;
   padding: 0;
   background: transparent;
   caret-color: #1a73e8;
+  line-height: 1.5;
 }
-#new-task-input::placeholder { color: #9aa0a6; }
+#new-task-input::placeholder { color: #bdc1c6; }
 
 #input-divider {
   height: 1px;
-  background: #1a73e8;
-  margin: 12px 0 16px;
+  background: #e0e0e0;
+  margin: 14px 0;
 }
+#input-divider.active { background: #1a73e8; }
 
 #input-actions {
   display: flex;
@@ -267,48 +271,12 @@ body {
   transition: background 0.15s;
 }
 
-#cancel-btn {
-  background: none;
-  color: #5f6368;
-}
+#cancel-btn { background: none; color: #5f6368; }
 #cancel-btn:hover { background: #f1f3f4; }
 
-#save-btn {
-  background: #1a73e8;
-  color: white;
-}
+#save-btn { background: #1a73e8; color: white; }
 #save-btn:hover { background: #1557b0; }
 #save-btn:disabled { background: #e0e0e0; color: #9aa0a6; cursor: default; }
-
-/* ── オーバーレイ ── */
-#overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.3);
-  z-index: 24;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.3s;
-}
-#overlay.open { opacity: 1; pointer-events: auto; }
-
-/* コピーボタン（ヘッダー右） */
-#copy-btn {
-  background: none;
-  border: 1px solid #dadce0;
-  border-radius: 20px;
-  padding: 6px 12px;
-  font-size: 12px;
-  font-weight: 500;
-  color: #5f6368;
-  cursor: pointer;
-  font-family: inherit;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  transition: background 0.15s;
-}
-#copy-btn:active { background: #f1f3f4; }
 </style>
 </head>
 <body>
@@ -346,22 +314,24 @@ body {
 </div>
 
 <!-- Overlay -->
-<div id="overlay" onclick="closeSheet()"></div>
+<div id="overlay" onclick="closeModal()"></div>
 
 <!-- FAB -->
-<button id="fab" onclick="toggleSheet()">
+<button id="fab" onclick="openModal()">
   <svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
 </button>
 
-<!-- Input sheet -->
-<div id="input-sheet">
-  <div id="input-sheet-handle"></div>
-  <input id="new-task-input" type="text" placeholder="新しいタスクを入力…"
+<!-- Input modal -->
+<div id="input-modal">
+  <div id="input-modal-label">新しいタスク</div>
+  <input id="new-task-input" type="text" placeholder="タスクを入力…"
     oninput="updateSaveBtn()"
-    onkeydown="if(event.key==='Enter')saveTask()">
+    onkeydown="if(event.key==='Enter')saveTask()"
+    onfocus="document.getElementById('input-divider').classList.add('active')"
+    onblur="document.getElementById('input-divider').classList.remove('active')">
   <div id="input-divider"></div>
   <div id="input-actions">
-    <button class="input-action-btn" id="cancel-btn" onclick="closeSheet()">キャンセル</button>
+    <button class="input-action-btn" id="cancel-btn" onclick="closeModal()">キャンセル</button>
     <button class="input-action-btn" id="save-btn" disabled onclick="saveTask()">保存</button>
   </div>
 </div>
@@ -372,7 +342,6 @@ const GAS_URL = 'https://script.google.com/macros/s/AKfycbzNEngb5IkUpSj5FDNVuuRY
 let tasks = [];
 let currentFilter = 'active';
 let saveTimer = null;
-let sheetOpen = false;
 
 // ── 同期 ───────────────────────────────────
 function setSyncState(state, text) {
@@ -419,22 +388,18 @@ function scheduleSave() {
   saveTimer = setTimeout(saveToSheet, 800);
 }
 
-// ── シート開閉 ─────────────────────────────
-function toggleSheet() {
-  sheetOpen ? closeSheet() : openSheet();
-}
-
-function openSheet() {
-  sheetOpen = true;
-  document.getElementById('input-sheet').classList.add('open');
+// ── モーダル ───────────────────────────────
+function openModal() {
+  document.getElementById('input-modal').classList.add('open');
   document.getElementById('overlay').classList.add('open');
   document.getElementById('fab').classList.add('open');
-  setTimeout(() => document.getElementById('new-task-input').focus(), 300);
+  // 即フォーカス（キーボードを即座に開く）
+  const inp = document.getElementById('new-task-input');
+  inp.focus();
 }
 
-function closeSheet() {
-  sheetOpen = false;
-  document.getElementById('input-sheet').classList.remove('open');
+function closeModal() {
+  document.getElementById('input-modal').classList.remove('open');
   document.getElementById('overlay').classList.remove('open');
   document.getElementById('fab').classList.remove('open');
   document.getElementById('new-task-input').value = '';
@@ -451,7 +416,7 @@ function saveTask() {
   const text = inp.value.trim();
   if (!text) return;
   tasks.unshift({ id: Date.now(), text, done: false });
-  closeSheet();
+  closeModal();
   render();
   scheduleSave();
 }
@@ -487,34 +452,31 @@ function render() {
   const active = tasks.filter(t => !t.done);
   const done   = tasks.filter(t =>  t.done);
 
-  let filtered;
-  if (currentFilter === 'active')     filtered = { active, done: [] };
-  else if (currentFilter === 'done')  filtered = { active: [], done };
-  else                                filtered = { active, done };
+  let showActive, showDone;
+  if      (currentFilter === 'active') { showActive = active; showDone = []; }
+  else if (currentFilter === 'done')   { showActive = []; showDone = done; }
+  else                                 { showActive = active; showDone = done; }
 
-  if (filtered.active.length === 0 && filtered.done.length === 0) {
+  if (showActive.length === 0 && showDone.length === 0) {
     const msg = document.createElement('div');
     msg.id = 'empty-msg';
     msg.textContent =
       currentFilter === 'done'   ? '完了済みのタスクはありません' :
-      currentFilter === 'active' ? 'タスクを追加してみましょう' :
-      'タスクがありません';
+      currentFilter === 'active' ? 'タスクを追加してみましょう' : 'タスクがありません';
     main.appendChild(msg);
     return;
   }
 
-  // 未完了
-  filtered.active.forEach(task => main.appendChild(makeTaskEl(task)));
+  showActive.forEach(task => main.appendChild(makeTaskEl(task)));
 
-  // 完了済み
-  if (filtered.done.length > 0) {
+  if (showDone.length > 0) {
     if (currentFilter === 'all') {
       const hdr = document.createElement('div');
       hdr.className = 'section-header';
-      hdr.textContent = `完了済み（${filtered.done.length}）`;
+      hdr.textContent = `完了済み（${showDone.length}）`;
       main.appendChild(hdr);
     }
-    filtered.done.forEach(task => main.appendChild(makeTaskEl(task)));
+    showDone.forEach(task => main.appendChild(makeTaskEl(task)));
   }
 }
 
@@ -523,10 +485,8 @@ function makeTaskEl(task) {
   div.className = 'task-item';
   div.onclick = () => toggleTask(task.id);
   div.innerHTML = `
-    <div class="check-wrap">
-      <div class="check-circle ${task.done ? 'done' : ''}">
-        ${task.done ? `<svg width="12" height="12" viewBox="0 0 24 24" fill="white"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>` : ''}
-      </div>
+    <div class="check-circle ${task.done ? 'done' : ''}">
+      ${task.done ? `<svg width="12" height="12" viewBox="0 0 24 24" fill="white"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>` : ''}
     </div>
     <div class="task-body">
       <div class="task-text ${task.done ? 'done' : ''}">${esc(task.text)}</div>
@@ -566,10 +526,10 @@ function fallbackCopy(text, cb) {
 // ── Toast ──────────────────────────────────
 let toastTimer;
 function showToast(msg) {
-  let t = document.getElementById('toast');
+  let t = document.getElementById('_toast');
   if (!t) {
     t = document.createElement('div');
-    t.id = 'toast';
+    t.id = '_toast';
     t.style.cssText = `position:fixed;bottom:110px;left:50%;transform:translateX(-50%) translateY(10px);
       background:rgba(40,40,40,0.92);color:white;padding:10px 20px;border-radius:20px;
       font-size:14px;font-weight:500;opacity:0;transition:all 0.25s;pointer-events:none;
