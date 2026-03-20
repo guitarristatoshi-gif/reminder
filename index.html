@@ -273,12 +273,30 @@ function saveTask(){
 function toggleTask(id){
   const t=tasks.find(t=>t.id===id); if(!t)return;
   if(!t.done){
-    const el=document.querySelector(`[data-id="${id}"] .check-circle`);
-    if(el) el.classList.add('checking');
+    // まずチェックアニメーション
+    const itemEl=document.querySelector(`[data-id="${id}"]`);
+    const circleEl=itemEl&&itemEl.querySelector('.check-circle');
+    if(circleEl) circleEl.classList.add('checking');
     setTimeout(()=>{
       t.done=true;
-      pushUndo({type:'complete', task:{...t,done:false}});
-      render(); scheduleSave();
+      scheduleSave();
+
+      // UIだけ即座に「完了済み見た目」に変える（リストからは消さない）
+      if(itemEl){
+        const circle=itemEl.querySelector('.check-circle');
+        if(circle){
+          circle.classList.remove('checking');
+          circle.classList.add('done');
+          circle.innerHTML=`<svg width="13" height="13" viewBox="0 0 24 24" fill="white"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>`;
+        }
+        const txt=itemEl.querySelector('.task-text');
+        if(txt){ txt.classList.add('done'); }
+      }
+
+      // Undoエントリを積んで、5秒後にrenderして正式にリストから消す
+      const entry={type:'complete', task:{...t,done:false}};
+      entry._removeTimer=setTimeout(()=>{ render(); },5000);
+      pushUndo(entry);
     },280);
   } else {
     t.done=false; render(); scheduleSave();
@@ -326,8 +344,9 @@ function showUndoToast(entry){
 
 function doUndo(entry, toast){
   clearTimeout(entry._timer);
-  toast.classList.remove('show');
-  setTimeout(()=>toast.remove(),400);
+  clearTimeout(entry._removeTimer); // 5秒後のrender予約もキャンセル
+  if(toast && toast.classList){ toast.classList.remove('show'); }
+  if(toast && toast.remove){ setTimeout(()=>{ try{toast.remove();}catch(e){} },400); }
   if(entry.type==='complete'){
     const t=tasks.find(t=>t.id===entry.task.id);
     if(t){ t.done=false; render(); scheduleSave(); }
@@ -341,7 +360,7 @@ function doUndo(entry, toast){
 function clearAllUndoToasts(){
   document.querySelectorAll('.undo-toast').forEach(t=>{
     t.classList.remove('show');
-    setTimeout(()=>t.remove(),400);
+    setTimeout(()=>{ try{t.remove();}catch(e){} },400);
   });
 }
 
@@ -351,8 +370,10 @@ document.addEventListener('keydown',e=>{
     e.preventDefault();
     if(undoStack.length===0)return;
     const entry=undoStack.pop();
-    if(entry._toast){ clearTimeout(entry._timer); entry._toast.classList.remove('show'); setTimeout(()=>entry._toast.remove(),400); }
-    doUndo(entry, {classList:{remove:()=>{}}, remove:()=>{}});
+    clearTimeout(entry._timer);
+    clearTimeout(entry._removeTimer);
+    if(entry._toast){ entry._toast.classList.remove('show'); setTimeout(()=>{ try{entry._toast.remove();}catch(ex){} },400); }
+    doUndo(entry, null);
   }
 });
 
