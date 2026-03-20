@@ -13,8 +13,6 @@ body {
   font-family:-apple-system,'Hiragino Sans','Hiragino Kaku Gothic ProN',sans-serif;
   background:#fff; color:#202124; -webkit-font-smoothing:antialiased; min-height:100vh; overflow-x:hidden;
 }
-
-/* ── Header ── */
 #header {
   display:flex; align-items:center; justify-content:space-between;
   padding:16px 20px; padding-top:max(16px,env(safe-area-inset-top));
@@ -41,8 +39,6 @@ body {
   display:flex; align-items:center; gap:5px;
 }
 #copy-btn:active { background:#f1f3f4; }
-
-/* ── Tabs ── */
 #tabs { display:flex; border-bottom:1px solid #e0e0e0; padding:0 20px; }
 .tab-btn {
   padding:12px 16px; font-size:14px; font-weight:500; color:#5f6368;
@@ -50,32 +46,13 @@ body {
   cursor:pointer; font-family:inherit; transition:all 0.15s; white-space:nowrap;
 }
 .tab-btn.active { color:#1a73e8; border-bottom-color:#1a73e8; }
-
-/* ── Task list ── */
 #main { padding:0 0 120px; max-width:600px; margin:0 auto; position:relative; }
-
 .task-item {
   display:flex; align-items:flex-start;
-  padding:14px 20px;
-  border-bottom:1px solid #f1f3f4; gap:12px; background:#fff;
+  padding:14px 20px; border-bottom:1px solid #f1f3f4; gap:12px; background:#fff;
   position:relative; user-select:none; -webkit-user-select:none;
-  transition:background 0.12s, box-shadow 0.15s, transform 0.15s;
+  transition:background 0.12s;
 }
-.task-item.drag-over-top    { border-top:2.5px solid #1a73e8; }
-.task-item.drag-over-bottom { border-bottom:2.5px solid #1a73e8; }
-.task-item.is-dragging {
-  opacity:0.4;
-}
-.task-item.floating {
-  position:fixed; z-index:500; left:0; right:0; margin:0 auto;
-  max-width:600px; background:#fff;
-  box-shadow:0 8px 32px rgba(0,0,0,0.18);
-  border-radius:12px; opacity:0.97;
-  transition:none;
-  pointer-events:none;
-}
-
-/* チェック丸 */
 .check-circle {
   width:22px; height:22px; border-radius:50%; border:2px solid #bdc1c6;
   background:none; display:flex; align-items:center; justify-content:center;
@@ -84,29 +61,19 @@ body {
 .check-circle:active { transform:scale(0.88); }
 .check-circle.checking { border-color:#1a73e8; background:#e8f0fe; }
 .check-circle.done { background:#1a73e8; border-color:#1a73e8; }
-
-.task-body { flex:1; min-width:0; }
+.task-body { flex:1; min-width:0; cursor:pointer; }
 .task-text { font-size:16px; color:#202124; line-height:1.5; word-break:break-all; }
 .task-text.done { color:#bdc1c6; text-decoration:line-through; }
-
-/* インラインアクション */
-.task-actions {
-  display:none; gap:6px; margin-top:8px; flex-wrap:wrap;
-}
+.task-actions { display:none; gap:6px; margin-top:8px; flex-wrap:wrap; }
 .task-actions.open { display:flex; }
 .task-action-btn {
   padding:5px 14px; border-radius:16px; border:none; font-size:13px; font-weight:500;
   cursor:pointer; font-family:inherit; transition:background 0.15s;
 }
 .task-action-consult { background:#FFF3E0; color:#E65100; }
-.task-action-consult:active { background:#FFE0B2; }
 .task-action-delete  { background:#fce8e6; color:#c62828; }
-.task-action-delete:active  { background:#f5c6c3; }
-
 .section-header { padding:16px 20px 8px; font-size:13px; font-weight:500; color:#5f6368; }
 #empty-msg { padding:60px 20px; text-align:center; color:#bdc1c6; font-size:15px; line-height:1.6; }
-
-/* ── Undo toast ── */
 .undo-toast {
   position:fixed; bottom:max(90px,calc(env(safe-area-inset-bottom)+80px)); left:50%;
   transform:translateX(-50%) translateY(20px);
@@ -121,8 +88,6 @@ body {
   background:none; border:none; color:#8ab4f8; font-size:14px; font-weight:700;
   cursor:pointer; padding:4px 12px; font-family:inherit;
 }
-
-/* ── FAB ── */
 #fab {
   position:fixed; bottom:max(28px,env(safe-area-inset-bottom,28px)); left:50%;
   transform:translateX(-50%); width:56px; height:56px; border-radius:50%;
@@ -133,15 +98,11 @@ body {
 }
 #fab:active { transform:translateX(-50%) scale(0.93); }
 #fab.open { background:#5f6368; }
-
-/* Overlay */
 #overlay {
   position:fixed; inset:0; background:rgba(0,0,0,0.4); z-index:40;
   opacity:0; pointer-events:none; transition:opacity 0.25s;
 }
 #overlay.open { opacity:1; pointer-events:auto; }
-
-/* Input modal */
 #input-modal {
   position:fixed; top:20%; left:50%; transform:translateX(-50%) translateY(-20px);
   width:calc(100% - 40px); max-width:500px;
@@ -164,7 +125,6 @@ body {
   cursor:pointer; font-family:inherit; transition:background 0.15s;
 }
 #cancel-btn { background:none; color:#5f6368; }
-#cancel-btn:hover { background:#f1f3f4; }
 #save-btn { background:#1a73e8; color:white; }
 #save-btn:disabled { background:#e0e0e0; color:#9aa0a6; cursor:default; }
 </style>
@@ -216,36 +176,68 @@ body {
 </div>
 
 <script>
-const GAS_URL  = 'https://script.google.com/macros/s/AKfycby9sKoIIBiLSrQRQHdKg-w8uAADQehIKpuuTyPRaVA2oj-AUBG7QoHGR2Q89zd384SJ/exec';
-const LS_KEY   = 'reminder-tasks-v3';
-const isMobile = /iPhone|Android|iPad/i.test(navigator.userAgent);
+const GAS_URL   = 'https://script.google.com/macros/s/AKfycbzEE5n8WEmhAFB1JCgnvsLJ1ZcPmZ7rgadOl_AjvXQMtHB395b-WE6RrKJXlu2qL18N/exec';
+const isMobile  = /iPhone|Android|iPad/i.test(navigator.userAgent);
 
 let tasks         = [];
 let currentFilter = 'active';
-let saveTimer     = null;
 let openActionId  = null;
-
-// undo スタック（完了・削除 両用）
-let undoStack = [];  // [{type:'complete'|'delete', task, index}]
-
-// ── ストレージ ─────────────────────────────
-function lsLoad(){ try{const r=localStorage.getItem(LS_KEY);return r?JSON.parse(r):null;}catch{return null;} }
-function lsSave(){ localStorage.setItem(LS_KEY,JSON.stringify(tasks)); }
+let undoStack     = [];
 
 // ── 同期 ───────────────────────────────────
 function setSS(s,t){ document.getElementById('sync-pill').className=s; document.getElementById('sync-text').textContent=t; }
-async function loadFromSheet(){
-  const c=lsLoad(); if(c){tasks=c;render();}
+
+async function loadTasks() {
+  // localStorageから即表示
+  const cached = localStorage.getItem('notion-tasks-v1');
+  if(cached){ tasks=JSON.parse(cached); render(); }
   setSS('syncing','同期中');
-  try{ const r=await fetch(GAS_URL+'?t='+Date.now()); tasks=await r.json(); lsSave(); setSS('ok','同期済み'); render(); }
-  catch{ setSS('error','オフライン'); if(!c){tasks=[];render();} }
+  try {
+    const res = await fetch(GAS_URL+'?t='+Date.now());
+    tasks = await res.json();
+    localStorage.setItem('notion-tasks-v1', JSON.stringify(tasks));
+    setSS('ok','同期済み'); render();
+  } catch {
+    setSS('error','オフライン');
+    if(!cached){ tasks=[]; render(); }
+  }
 }
-async function saveToSheet(){
-  setSS('syncing','保存中'); lsSave();
-  try{ await fetch(GAS_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({tasks})}); setSS('ok','同期済み'); }
-  catch{ setSS('error','保存失敗'); }
+
+async function addToNotion(text) {
+  try {
+    await fetch(GAS_URL, {
+      method:'POST', headers:{'Content-Type':'text/plain'},
+      body: JSON.stringify({action:'add', text})
+    });
+  } catch { setSS('error','保存失敗'); }
 }
-function scheduleSave(){ clearTimeout(saveTimer); saveTimer=setTimeout(saveToSheet,800); }
+
+async function completeInNotion(id) {
+  try {
+    await fetch(GAS_URL, {
+      method:'POST', headers:{'Content-Type':'text/plain'},
+      body: JSON.stringify({action:'complete', id})
+    });
+  } catch { setSS('error','保存失敗'); }
+}
+
+async function uncompleteInNotion(id) {
+  try {
+    await fetch(GAS_URL, {
+      method:'POST', headers:{'Content-Type':'text/plain'},
+      body: JSON.stringify({action:'uncomplete', id})
+    });
+  } catch { setSS('error','保存失敗'); }
+}
+
+async function deleteInNotion(id) {
+  try {
+    await fetch(GAS_URL, {
+      method:'POST', headers:{'Content-Type':'text/plain'},
+      body: JSON.stringify({action:'delete', id})
+    });
+  } catch { setSS('error','保存失敗'); }
+}
 
 // ── モーダル ───────────────────────────────
 function openModal(){
@@ -262,44 +254,48 @@ function closeModal(){
   document.getElementById('save-btn').disabled=true;
 }
 function updateSaveBtn(){ document.getElementById('save-btn').disabled=!document.getElementById('new-task-input').value.trim(); }
-function saveTask(){
+
+async function saveTask(){
   const inp=document.getElementById('new-task-input');
   const text=inp.value.trim(); if(!text)return;
-  tasks.unshift({id:Date.now(),text,done:false});
-  closeModal(); render(); scheduleSave();
+  closeModal();
+  setSS('syncing','保存中');
+  // 楽観的UI更新
+  const tempId='temp-'+Date.now();
+  tasks.unshift({id:tempId, text, done:false});
+  render();
+  await addToNotion(text);
+  // 再読み込みして正式なIDに更新
+  await loadTasks();
 }
 
 // ── タスク操作 ─────────────────────────────
 function toggleTask(id){
   const t=tasks.find(t=>t.id===id); if(!t)return;
   if(!t.done){
-    // まずチェックアニメーション
     const itemEl=document.querySelector(`[data-id="${id}"]`);
     const circleEl=itemEl&&itemEl.querySelector('.check-circle');
     if(circleEl) circleEl.classList.add('checking');
     setTimeout(()=>{
       t.done=true;
-      scheduleSave();
-
-      // UIだけ即座に「完了済み見た目」に変える（リストからは消さない）
+      localStorage.setItem('notion-tasks-v1', JSON.stringify(tasks));
+      // UIだけ即座に更新
       if(itemEl){
         const circle=itemEl.querySelector('.check-circle');
-        if(circle){
-          circle.classList.remove('checking');
-          circle.classList.add('done');
-          circle.innerHTML=`<svg width="13" height="13" viewBox="0 0 24 24" fill="white"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>`;
-        }
+        if(circle){ circle.classList.remove('checking'); circle.classList.add('done'); circle.innerHTML=`<svg width="13" height="13" viewBox="0 0 24 24" fill="white"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>`; }
         const txt=itemEl.querySelector('.task-text');
-        if(txt){ txt.classList.add('done'); }
+        if(txt) txt.classList.add('done');
       }
-
-      // Undoエントリを積んで、5秒後にrenderして正式にリストから消す
       const entry={type:'complete', task:{...t,done:false}};
-      entry._removeTimer=setTimeout(()=>{ render(); },5000);
+      entry._removeTimer=setTimeout(()=>render(),5000);
       pushUndo(entry);
+      completeInNotion(id);
     },280);
   } else {
-    t.done=false; render(); scheduleSave();
+    t.done=false;
+    localStorage.setItem('notion-tasks-v1', JSON.stringify(tasks));
+    render();
+    uncompleteInNotion(id);
   }
 }
 
@@ -307,7 +303,9 @@ function deleteTask(id){
   const idx=tasks.findIndex(t=>t.id===id); if(idx===-1)return;
   pushUndo({type:'delete', task:{...tasks[idx]}, index:idx});
   tasks.splice(idx,1);
-  closeActions(); render(); scheduleSave();
+  localStorage.setItem('notion-tasks-v1', JSON.stringify(tasks));
+  closeActions(); render();
+  deleteInNotion(id);
 }
 
 function setFilter(val,btn){
@@ -319,69 +317,52 @@ function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/
 
 // ── Undo ───────────────────────────────────
 function pushUndo(entry){
-  // 以前のtoastを消す
   clearAllUndoToasts();
   undoStack.push(entry);
   showUndoToast(entry);
 }
-
 function showUndoToast(entry){
-  const msg = entry.type==='complete' ? 'タスクを完了しました' : 'タスクを削除しました';
-  const toast = document.createElement('div');
-  toast.className = 'undo-toast';
-  toast.innerHTML = `<span>${msg}</span><button class="undo-toast-btn">元に戻す</button>`;
-  toast.querySelector('.undo-toast-btn').addEventListener('click',()=>{
-    doUndo(entry, toast);
-  });
+  const msg=entry.type==='complete'?'タスクを完了しました':'タスクを削除しました';
+  const toast=document.createElement('div');
+  toast.className='undo-toast';
+  toast.innerHTML=`<span>${msg}</span><button class="undo-toast-btn">元に戻す</button>`;
+  toast.querySelector('.undo-toast-btn').addEventListener('click',()=>doUndo(entry,toast));
   document.body.appendChild(toast);
   requestAnimationFrame(()=>requestAnimationFrame(()=>toast.classList.add('show')));
-  entry._toast = toast;
-  entry._timer = setTimeout(()=>{
-    toast.classList.remove('show');
-    setTimeout(()=>toast.remove(),400);
-  }, 5000);
+  entry._toast=toast;
+  entry._timer=setTimeout(()=>{ toast.classList.remove('show'); setTimeout(()=>toast.remove(),400); },5000);
 }
-
-function doUndo(entry, toast){
-  clearTimeout(entry._timer);
-  clearTimeout(entry._removeTimer); // 5秒後のrender予約もキャンセル
-  if(toast && toast.classList){ toast.classList.remove('show'); }
-  if(toast && toast.remove){ setTimeout(()=>{ try{toast.remove();}catch(e){} },400); }
+function doUndo(entry,toast){
+  clearTimeout(entry._timer); clearTimeout(entry._removeTimer);
+  if(toast&&toast.classList){ toast.classList.remove('show'); setTimeout(()=>{ try{toast.remove();}catch(e){} },400); }
   if(entry.type==='complete'){
     const t=tasks.find(t=>t.id===entry.task.id);
-    if(t){ t.done=false; render(); scheduleSave(); }
+    if(t){ t.done=false; localStorage.setItem('notion-tasks-v1',JSON.stringify(tasks)); render(); uncompleteInNotion(t.id); }
   } else if(entry.type==='delete'){
-    const idx=Math.min(entry.index, tasks.length);
-    tasks.splice(idx,0,entry.task);
-    render(); scheduleSave();
+    tasks.splice(Math.min(entry.index,tasks.length),0,entry.task);
+    localStorage.setItem('notion-tasks-v1',JSON.stringify(tasks)); render();
+    // Notionでも復元（再追加）
+    addToNotion(entry.task.text).then(()=>loadTasks());
   }
 }
-
 function clearAllUndoToasts(){
-  document.querySelectorAll('.undo-toast').forEach(t=>{
-    t.classList.remove('show');
-    setTimeout(()=>{ try{t.remove();}catch(e){} },400);
-  });
+  document.querySelectorAll('.undo-toast').forEach(t=>{ t.classList.remove('show'); setTimeout(()=>{ try{t.remove();}catch(e){} },400); });
 }
-
-// Cmd+Z / Ctrl+Z
 document.addEventListener('keydown',e=>{
   if((e.metaKey||e.ctrlKey)&&e.key==='z'){
     e.preventDefault();
-    if(undoStack.length===0)return;
+    if(!undoStack.length)return;
     const entry=undoStack.pop();
-    clearTimeout(entry._timer);
-    clearTimeout(entry._removeTimer);
+    clearTimeout(entry._timer); clearTimeout(entry._removeTimer);
     if(entry._toast){ entry._toast.classList.remove('show'); setTimeout(()=>{ try{entry._toast.remove();}catch(ex){} },400); }
-    doUndo(entry, null);
+    doUndo(entry,null);
   }
 });
 
 // ── アクション展開 ─────────────────────────
 function toggleActions(id){
   if(openActionId===id){ closeActions(); return; }
-  closeActions();
-  openActionId=id;
+  closeActions(); openActionId=id;
   const el=document.querySelector(`[data-id="${id}"] .task-actions`);
   if(el) el.classList.add('open');
 }
@@ -391,6 +372,7 @@ function closeActions(){
   if(el) el.classList.remove('open');
   openActionId=null;
 }
+document.addEventListener('click',()=>closeActions());
 
 // ── Claudeに相談 ──────────────────────────
 function consultClaude(id){
@@ -398,9 +380,8 @@ function consultClaude(id){
   closeActions();
   const prompt=encodeURIComponent(`以下のタスクを進めるために、具体的なアドバイスや手順を教えてください：\n\n「${t.text}」`);
   if(isMobile){
-    // iOSアプリ deeplink → フォールバックでブラウザ
     window.location.href=`claude://new?q=${prompt}`;
-    setTimeout(()=>{ window.open(`https://claude.ai/new?q=${prompt}`,'_blank'); },1200);
+    setTimeout(()=>window.open(`https://claude.ai/new?q=${prompt}`,'_blank'),1200);
   } else {
     window.open(`https://claude.ai/new?q=${prompt}`,'_blank');
   }
@@ -408,19 +389,15 @@ function consultClaude(id){
 
 // ── レンダリング ───────────────────────────
 function render(){
-  const main=document.getElementById('main');
-  main.innerHTML='';
-  const active=tasks.filter(t=>!t.done);
-  const done  =tasks.filter(t=> t.done);
+  const main=document.getElementById('main'); main.innerHTML='';
+  const active=tasks.filter(t=>!t.done), done=tasks.filter(t=>t.done);
   let sA,sD;
   if     (currentFilter==='active'){sA=active;sD=[];}
   else if(currentFilter==='done'  ){sA=[];sD=done;}
   else                             {sA=active;sD=done;}
-
   if(sA.length===0&&sD.length===0){
     const msg=document.createElement('div'); msg.id='empty-msg';
-    msg.textContent=currentFilter==='done'?'完了済みのタスクはありません':
-                    currentFilter==='active'?'タスクを追加してみましょう':'タスクがありません';
+    msg.textContent=currentFilter==='done'?'完了済みのタスクはありません':currentFilter==='active'?'タスクを追加してみましょう':'タスクがありません';
     main.appendChild(msg); return;
   }
   sA.forEach(t=>main.appendChild(makeTaskEl(t)));
@@ -436,7 +413,6 @@ function render(){
 function makeTaskEl(task){
   const div=document.createElement('div');
   div.className='task-item'; div.dataset.id=task.id;
-
   div.innerHTML=`
     <div class="check-circle ${task.done?'done':''}">
       ${task.done?`<svg width="13" height="13" viewBox="0 0 24 24" fill="white"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg>`:''}
@@ -449,158 +425,65 @@ function makeTaskEl(task){
       </div>
     </div>`;
 
-  // 丸ボタン → 完了
-  div.querySelector('.check-circle').addEventListener('click', e=>{
-    e.stopPropagation(); toggleTask(task.id);
-  });
+  div.querySelector('.check-circle').addEventListener('click',e=>{ e.stopPropagation(); toggleTask(task.id); });
+  div.querySelector('.task-action-consult').addEventListener('click',e=>{ e.stopPropagation(); consultClaude(task.id); });
+  div.querySelector('.task-action-delete').addEventListener('click',e=>{ e.stopPropagation(); deleteTask(task.id); });
 
-  // アクションボタン
-  div.querySelector('.task-action-consult').addEventListener('click', e=>{
-    e.stopPropagation(); consultClaude(task.id);
-  });
-  div.querySelector('.task-action-delete').addEventListener('click', e=>{
-    e.stopPropagation(); deleteTask(task.id);
-  });
-
-  // テキストタップ/クリック → アクション展開
   const body=div.querySelector('.task-body');
-
   if(isMobile){
-    // スマホ：タップ vs 長押し（ドラッグ）を判定
-    let touchStartY=0, touchStartX=0, touchStartTime=0;
-    let longPressTimer=null, isDragging=false;
-
-    body.addEventListener('touchstart', e=>{
-      touchStartY=e.touches[0].clientY;
-      touchStartX=e.touches[0].clientX;
-      touchStartTime=Date.now();
-      isDragging=false;
-      longPressTimer=setTimeout(()=>{
-        isDragging=true;
-        startTouchDrag(div, task.id, e);
-      }, 500);
-    },{passive:true});
-
-    body.addEventListener('touchmove', e=>{
-      const dy=Math.abs(e.touches[0].clientY-touchStartY);
-      const dx=Math.abs(e.touches[0].clientX-touchStartX);
-      if(dy>8||dx>8) clearTimeout(longPressTimer);
-    },{passive:true});
-
-    body.addEventListener('touchend', e=>{
-      clearTimeout(longPressTimer);
-      if(!isDragging && Date.now()-touchStartTime < 500){
-        toggleActions(task.id);
-      }
-    });
+    let timer,isDragging=false,startY=0,startX=0;
+    body.addEventListener('touchstart',e=>{ startY=e.touches[0].clientY; startX=e.touches[0].clientX; isDragging=false; timer=setTimeout(()=>{ isDragging=true; startTouchDrag(div,task.id,e); },500); },{passive:true});
+    body.addEventListener('touchmove',e=>{ if(Math.abs(e.touches[0].clientY-startY)>8||Math.abs(e.touches[0].clientX-startX)>8) clearTimeout(timer); },{passive:true});
+    body.addEventListener('touchend',e=>{ clearTimeout(timer); if(!isDragging) toggleActions(task.id); });
   } else {
-    // Mac：クリックでアクション展開
-    body.addEventListener('click', e=>{
-      e.stopPropagation();
-      toggleActions(task.id);
-    });
-  }
-
-  // デスクトップ drag（Mac）
-  if(!isMobile){
-    div.addEventListener('dragstart', e=>{
-      dragSrcId=task.id; e.dataTransfer.effectAllowed='move';
-      setTimeout(()=>div.classList.add('is-dragging'),0);
-    });
-    div.addEventListener('dragend', ()=>{
-      div.classList.remove('is-dragging');
-      document.querySelectorAll('.task-item').forEach(i=>i.classList.remove('drag-over-top','drag-over-bottom'));
-      dragSrcId=null;
-    });
-    div.addEventListener('dragover', e=>{
-      e.preventDefault();
-      const rect=div.getBoundingClientRect();
-      const mid=rect.top+rect.height/2;
-      document.querySelectorAll('.task-item').forEach(i=>i.classList.remove('drag-over-top','drag-over-bottom'));
-      div.classList.add(e.clientY<mid?'drag-over-top':'drag-over-bottom');
-      dragOverId=task.id; dragOverPos=(e.clientY<mid?'before':'after');
-    });
-    div.addEventListener('dragleave', ()=>div.classList.remove('drag-over-top','drag-over-bottom'));
-    div.addEventListener('drop', e=>{
-      e.preventDefault();
-      div.classList.remove('drag-over-top','drag-over-bottom');
-      if(dragSrcId&&dragSrcId!==task.id) reorderTasks(dragSrcId,task.id,dragOverPos);
-    });
+    body.addEventListener('click',e=>{ e.stopPropagation(); toggleActions(task.id); });
     div.draggable=true;
+    div.addEventListener('dragstart',e=>{ dragSrcId=task.id; e.dataTransfer.effectAllowed='move'; setTimeout(()=>div.classList.add('ghost-src'),0); });
+    div.addEventListener('dragend',()=>{ div.classList.remove('ghost-src'); document.querySelectorAll('.task-item').forEach(i=>i.classList.remove('drag-over-top','drag-over-bottom')); dragSrcId=null; });
+    div.addEventListener('dragover',e=>{ e.preventDefault(); const r=div.getBoundingClientRect(),mid=r.top+r.height/2; document.querySelectorAll('.task-item').forEach(i=>i.classList.remove('drag-over-top','drag-over-bottom')); div.classList.add(e.clientY<mid?'drag-over-top':'drag-over-bottom'); dragOverId=task.id; dragOverPos=e.clientY<mid?'before':'after'; });
+    div.addEventListener('dragleave',()=>div.classList.remove('drag-over-top','drag-over-bottom'));
+    div.addEventListener('drop',e=>{ e.preventDefault(); div.classList.remove('drag-over-top','drag-over-bottom'); if(dragSrcId&&dragSrcId!==task.id) reorderTasks(dragSrcId,task.id,dragOverPos); });
   }
-
   return div;
 }
 
-// 外クリックでアクション閉じる
-document.addEventListener('click', ()=>closeActions());
-
-// ── デスクトップ drag ──────────────────────
-let dragSrcId=null, dragOverId=null, dragOverPos='after';
-
-// ── タッチドラッグ（スマホ長押し） ────────
-function startTouchDrag(dragEl, taskId, startEvent){
-  const task=tasks.find(t=>t.id===taskId); if(!task)return;
-
-  // フローティングクローン
-  const rect=dragEl.getBoundingClientRect();
-  const clone=dragEl.cloneNode(true);
-  clone.classList.add('floating');
-  clone.style.width=rect.width+'px';
-  clone.style.top=rect.top+'px';
-  document.body.appendChild(clone);
-  dragEl.classList.add('is-dragging');
-
-  const offsetY=startEvent.touches[0].clientY-rect.top;
-
-  function onMove(e){
-    e.preventDefault();
-    const ty=e.touches[0].clientY;
-    clone.style.top=(ty-offsetY)+'px';
-
-    // どのアイテムの上にいるか
-    document.querySelectorAll('.task-item:not(.is-dragging):not(.floating)').forEach(item=>{
-      item.classList.remove('drag-over-top','drag-over-bottom');
-      const r=item.getBoundingClientRect();
-      if(ty>=r.top&&ty<=r.bottom){
-        const mid=r.top+r.height/2;
-        item.classList.add(ty<mid?'drag-over-top':'drag-over-bottom');
-      }
-    });
-  }
-
-  function onEnd(e){
-    clone.remove(); dragEl.classList.remove('is-dragging');
-    document.querySelectorAll('.task-item').forEach(i=>i.classList.remove('drag-over-top','drag-over-bottom'));
-
-    // drop先を探す
-    const ty=e.changedTouches[0].clientY;
-    let targetId=null, pos='after';
-    document.querySelectorAll('.task-item:not(.is-dragging)').forEach(item=>{
-      const r=item.getBoundingClientRect();
-      if(ty>=r.top&&ty<=r.bottom){
-        targetId=parseInt(item.dataset.id);
-        pos=ty<(r.top+r.height/2)?'before':'after';
-      }
-    });
-    if(targetId&&targetId!==taskId) reorderTasks(taskId,targetId,pos);
-
-    document.removeEventListener('touchmove',onMove);
-    document.removeEventListener('touchend',onEnd);
-  }
-
-  document.addEventListener('touchmove',onMove,{passive:false});
-  document.addEventListener('touchend',onEnd);
-}
+let dragSrcId=null,dragOverId=null,dragOverPos='after';
 
 function reorderTasks(srcId,tgtId,pos='after'){
-  const si=tasks.findIndex(t=>t.id===srcId);
-  const ti=tasks.findIndex(t=>t.id===tgtId);
+  const si=tasks.findIndex(t=>t.id===srcId), ti=tasks.findIndex(t=>t.id===tgtId);
   if(si===-1||ti===-1)return;
   const[moved]=tasks.splice(si,1);
   const newTi=tasks.findIndex(t=>t.id===tgtId);
   tasks.splice(pos==='before'?newTi:newTi+1,0,moved);
-  render(); scheduleSave();
+  localStorage.setItem('notion-tasks-v1',JSON.stringify(tasks)); render();
+}
+
+function startTouchDrag(dragEl,taskId,startEvent){
+  const task=tasks.find(t=>t.id===taskId); if(!task)return;
+  const rect=dragEl.getBoundingClientRect();
+  const clone=dragEl.cloneNode(true);
+  clone.style.cssText=`position:fixed;z-index:500;left:0;right:0;margin:0 auto;max-width:600px;background:#fff;box-shadow:0 8px 32px rgba(0,0,0,0.18);border-radius:12px;opacity:0.97;pointer-events:none;top:${rect.top}px;`;
+  document.body.appendChild(clone);
+  dragEl.style.opacity='0.35';
+  const offsetY=startEvent.touches[0].clientY-rect.top;
+  let currentTarget=null;
+  function onMove(e){
+    const ty=e.touches[0].clientY;
+    clone.style.top=(ty-offsetY)+'px';
+    document.querySelectorAll('.task-item:not([style*="opacity"])').forEach(item=>{
+      item.classList.remove('drag-over-top','drag-over-bottom');
+      const r=item.getBoundingClientRect();
+      if(ty>=r.top&&ty<=r.bottom){ item.classList.add(ty<r.top+r.height/2?'drag-over-top':'drag-over-bottom'); currentTarget=item; }
+    });
+  }
+  function onEnd(e){
+    clone.remove(); dragEl.style.opacity='';
+    document.querySelectorAll('.task-item').forEach(i=>i.classList.remove('drag-over-top','drag-over-bottom'));
+    if(currentTarget){ const tid=parseInt(currentTarget.dataset.id); if(tid&&tid!==taskId) reorderTasks(taskId,tid,'after'); }
+    document.removeEventListener('touchmove',onMove); document.removeEventListener('touchend',onEnd);
+  }
+  document.addEventListener('touchmove',onMove,{passive:false});
+  document.addEventListener('touchend',onEnd);
 }
 
 // ── コピー ─────────────────────────────────
@@ -615,29 +498,18 @@ function copyTasks(){
   else fallbackCopy(text,cb);
 }
 function fallbackCopy(text,cb){
-  const ta=document.createElement('textarea'); ta.value=text;
-  ta.style.cssText='position:fixed;opacity:0;top:0;left:0';
-  document.body.appendChild(ta); ta.focus(); ta.select();
-  document.execCommand('copy'); document.body.removeChild(ta); cb();
+  const ta=document.createElement('textarea'); ta.value=text; ta.style.cssText='position:fixed;opacity:0;top:0;left:0';
+  document.body.appendChild(ta); ta.focus(); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); cb();
 }
 let toastTimer;
 function showToast(msg){
   let t=document.getElementById('_toast');
-  if(!t){
-    t=document.createElement('div'); t.id='_toast';
-    t.style.cssText=`position:fixed;bottom:110px;left:50%;transform:translateX(-50%) translateY(10px);
-      background:rgba(40,40,40,0.92);color:white;padding:10px 20px;border-radius:20px;
-      font-size:14px;font-weight:500;opacity:0;transition:all 0.25s;pointer-events:none;
-      white-space:nowrap;z-index:100;font-family:-apple-system,sans-serif;`;
-    document.body.appendChild(t);
-  }
+  if(!t){ t=document.createElement('div'); t.id='_toast'; t.style.cssText=`position:fixed;bottom:110px;left:50%;transform:translateX(-50%) translateY(10px);background:rgba(40,40,40,0.92);color:white;padding:10px 20px;border-radius:20px;font-size:14px;font-weight:500;opacity:0;transition:all 0.25s;pointer-events:none;white-space:nowrap;z-index:100;font-family:-apple-system,sans-serif;`; document.body.appendChild(t); }
   t.textContent=msg; t.style.opacity='1'; t.style.transform='translateX(-50%) translateY(0)';
-  clearTimeout(toastTimer);
-  toastTimer=setTimeout(()=>{ t.style.opacity='0'; t.style.transform='translateX(-50%) translateY(10px)'; },2500);
+  clearTimeout(toastTimer); toastTimer=setTimeout(()=>{ t.style.opacity='0'; t.style.transform='translateX(-50%) translateY(10px)'; },2500);
 }
 
-// ── 起動 ───────────────────────────────────
-loadFromSheet();
+loadTasks();
 </script>
 </body>
 </html>
