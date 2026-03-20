@@ -56,13 +56,24 @@ body {
 
 .task-item {
   display:flex; align-items:flex-start;
-  padding:14px 12px 14px 20px;
+  padding:14px 20px;
   border-bottom:1px solid #f1f3f4; gap:12px; background:#fff;
   position:relative; user-select:none; -webkit-user-select:none;
-  transition:background 0.1s, opacity 0.2s;
+  transition:background 0.12s, box-shadow 0.15s, transform 0.15s;
 }
-.task-item.drag-over { background:#e8f0fe; border:2px dashed #1a73e8; }
-.task-item.ghost-src { opacity:0.35; }
+.task-item.drag-over-top    { border-top:2.5px solid #1a73e8; }
+.task-item.drag-over-bottom { border-bottom:2.5px solid #1a73e8; }
+.task-item.is-dragging {
+  opacity:0.4;
+}
+.task-item.floating {
+  position:fixed; z-index:500; left:0; right:0; margin:0 auto;
+  max-width:600px; background:#fff;
+  box-shadow:0 8px 32px rgba(0,0,0,0.18);
+  border-radius:12px; opacity:0.97;
+  transition:none;
+  pointer-events:none;
+}
 
 /* チェック丸 */
 .check-circle {
@@ -74,74 +85,42 @@ body {
 .check-circle.checking { border-color:#1a73e8; background:#e8f0fe; }
 .check-circle.done { background:#1a73e8; border-color:#1a73e8; }
 
-.task-body { flex:1; min-width:0; cursor:pointer; }
+.task-body { flex:1; min-width:0; }
 .task-text { font-size:16px; color:#202124; line-height:1.5; word-break:break-all; }
 .task-text.done { color:#bdc1c6; text-decoration:line-through; }
 
-/* inline action buttons（クリック後に展開） */
+/* インラインアクション */
 .task-actions {
-  display:none; gap:6px; margin-top:8px;
+  display:none; gap:6px; margin-top:8px; flex-wrap:wrap;
 }
 .task-actions.open { display:flex; }
 .task-action-btn {
   padding:5px 14px; border-radius:16px; border:none; font-size:13px; font-weight:500;
   cursor:pointer; font-family:inherit; transition:background 0.15s;
 }
-.task-action-consult { background:#FFF3E0; color:#FF9500; }
-.task-action-consult:hover { background:#FFE0B2; }
-.task-action-delete  { background:#fce8e6; color:#ea4335; }
-.task-action-delete:hover  { background:#f5c6c3; }
-
-/* ドラッグハンドル */
-.drag-handle {
-  display:flex; flex-direction:column; align-items:center; justify-content:center;
-  gap:3px; padding:4px 6px; cursor:grab; flex-shrink:0; margin-top:2px;
-  opacity:0.3; transition:opacity 0.15s; touch-action:none;
-}
-.task-item:hover .drag-handle { opacity:0.6; }
-.drag-handle:active { cursor:grabbing; opacity:1; }
-.drag-handle span { display:block; width:18px; height:2px; background:#5f6368; border-radius:1px; }
+.task-action-consult { background:#FFF3E0; color:#E65100; }
+.task-action-consult:active { background:#FFE0B2; }
+.task-action-delete  { background:#fce8e6; color:#c62828; }
+.task-action-delete:active  { background:#f5c6c3; }
 
 .section-header { padding:16px 20px 8px; font-size:13px; font-weight:500; color:#5f6368; }
 #empty-msg { padding:60px 20px; text-align:center; color:#bdc1c6; font-size:15px; line-height:1.6; }
 
-/* ── ドラッグゴースト ── */
-#drag-ghost {
-  position:fixed; pointer-events:none; z-index:1000;
-  background:#fff; border-radius:12px; box-shadow:0 8px 24px rgba(0,0,0,0.18);
-  padding:12px 18px; font-size:15px; color:#202124; line-height:1.4;
-  max-width:300px; opacity:0; transition:opacity 0.1s;
-  border-left:4px solid #1a73e8; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-}
-#drag-ghost.visible { opacity:0.95; }
-
-/* ── Undo toast（元に戻す） ── */
-#undo-toast {
+/* ── Undo toast ── */
+.undo-toast {
   position:fixed; bottom:max(90px,calc(env(safe-area-inset-bottom)+80px)); left:50%;
   transform:translateX(-50%) translateY(20px);
   background:#323232; color:white; border-radius:24px;
   padding:12px 8px 12px 20px; font-size:14px; font-weight:500;
-  display:flex; align-items:center; gap:12px; z-index:200;
-  opacity:0; pointer-events:none; transition:all 0.3s; white-space:nowrap;
+  display:flex; align-items:center; gap:4px; z-index:300;
+  opacity:0; pointer-events:none; transition:all 0.28s; white-space:nowrap;
   font-family:-apple-system,sans-serif;
 }
-#undo-toast.show { opacity:1; pointer-events:auto; transform:translateX(-50%) translateY(0); }
-#undo-btn {
+.undo-toast.show { opacity:1; pointer-events:auto; transform:translateX(-50%) translateY(0); }
+.undo-toast-btn {
   background:none; border:none; color:#8ab4f8; font-size:14px; font-weight:700;
-  cursor:pointer; padding:4px 12px 4px 0; font-family:inherit;
+  cursor:pointer; padding:4px 12px; font-family:inherit;
 }
-#undo-btn:hover { color:#aecbfa; }
-
-/* ── Cmd+Z toast ── */
-#cmdz-toast {
-  position:fixed; bottom:max(90px,calc(env(safe-area-inset-bottom)+80px)); left:50%;
-  transform:translateX(-50%) translateY(20px);
-  background:#323232; color:white; border-radius:24px;
-  padding:12px 20px; font-size:14px; font-weight:500;
-  z-index:200; opacity:0; pointer-events:none; transition:all 0.3s; white-space:nowrap;
-  font-family:-apple-system,sans-serif;
-}
-#cmdz-toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
 
 /* ── FAB ── */
 #fab {
@@ -155,14 +134,14 @@ body {
 #fab:active { transform:translateX(-50%) scale(0.93); }
 #fab.open { background:#5f6368; }
 
-/* ── Overlay ── */
+/* Overlay */
 #overlay {
   position:fixed; inset:0; background:rgba(0,0,0,0.4); z-index:40;
   opacity:0; pointer-events:none; transition:opacity 0.25s;
 }
 #overlay.open { opacity:1; pointer-events:auto; }
 
-/* ── Input modal ── */
+/* Input modal */
 #input-modal {
   position:fixed; top:20%; left:50%; transform:translateX(-50%) translateY(-20px);
   width:calc(100% - 40px); max-width:500px;
@@ -180,7 +159,7 @@ body {
 #input-divider { height:1px; background:#e0e0e0; margin:14px 0; }
 #input-divider.active { background:#1a73e8; }
 #input-actions { display:flex; justify-content:flex-end; gap:8px; }
-.input-action-btn {
+.modal-btn {
   padding:8px 20px; border-radius:20px; border:none; font-size:14px; font-weight:500;
   cursor:pointer; font-family:inherit; transition:background 0.15s;
 }
@@ -216,17 +195,6 @@ body {
 
 <div id="main"><div id="empty-msg">読み込み中…</div></div>
 
-<div id="drag-ghost"></div>
-
-<!-- 元に戻す toast -->
-<div id="undo-toast">
-  <span id="undo-msg">完了済みに移動しました</span>
-  <button id="undo-btn" onclick="undoComplete()">元に戻す</button>
-</div>
-
-<!-- Cmd+Z toast -->
-<div id="cmdz-toast">🔁 タスクを復元しました</div>
-
 <div id="overlay" onclick="closeModal()"></div>
 
 <button id="fab" onclick="openModal()">
@@ -242,49 +210,42 @@ body {
     onblur="document.getElementById('input-divider').classList.remove('active')">
   <div id="input-divider"></div>
   <div id="input-actions">
-    <button class="input-action-btn" id="cancel-btn" onclick="closeModal()">キャンセル</button>
-    <button class="input-action-btn" id="save-btn" disabled onclick="saveTask()">保存</button>
+    <button class="modal-btn" id="cancel-btn" onclick="closeModal()">キャンセル</button>
+    <button class="modal-btn" id="save-btn" disabled onclick="saveTask()">保存</button>
   </div>
 </div>
 
 <script>
-const GAS_URL   = 'https://script.google.com/macros/s/AKfycbzNEngb5IkUpSj5FDNVuuRYPNxuKugjkc0naqItiofhE_qMWfr9QBFA_4WDAGOek_UU/exec';
-const LS_KEY    = 'reminder-tasks-v3';
-const isMobile  = /iPhone|Android|iPad/i.test(navigator.userAgent);
+const GAS_URL  = 'https://script.google.com/macros/s/AKfycbzNEngb5IkUpSj5FDNVuuRYPNxuKugjkc0naqItiofhE_qMWfr9QBFA_4WDAGOek_UU/exec';
+const LS_KEY   = 'reminder-tasks-v3';
+const isMobile = /iPhone|Android|iPad/i.test(navigator.userAgent);
 
-let tasks          = [];
-let currentFilter  = 'active';
-let saveTimer      = null;
-let undoTask       = null;   // 完了取り消し用
-let undoTimer      = null;
-let deletedTask    = null;   // Cmd+Z用
-let deletedIndex   = null;
-let openActionId   = null;   // 現在アクション展開中のタスクID
+let tasks         = [];
+let currentFilter = 'active';
+let saveTimer     = null;
+let openActionId  = null;
+
+// undo スタック（完了・削除 両用）
+let undoStack = [];  // [{type:'complete'|'delete', task, index}]
 
 // ── ストレージ ─────────────────────────────
-function lsLoad() { try { const r=localStorage.getItem(LS_KEY); return r?JSON.parse(r):null; } catch{return null;} }
-function lsSave()  { localStorage.setItem(LS_KEY, JSON.stringify(tasks)); }
+function lsLoad(){ try{const r=localStorage.getItem(LS_KEY);return r?JSON.parse(r):null;}catch{return null;} }
+function lsSave(){ localStorage.setItem(LS_KEY,JSON.stringify(tasks)); }
 
 // ── 同期 ───────────────────────────────────
-function setSyncState(s,t) { document.getElementById('sync-pill').className=s; document.getElementById('sync-text').textContent=t; }
-async function loadFromSheet() {
-  const cached=lsLoad();
-  if(cached){tasks=cached;render();}
-  setSyncState('syncing','同期中');
-  try {
-    const res=await fetch(GAS_URL+'?t='+Date.now());
-    tasks=await res.json(); lsSave(); setSyncState('ok','同期済み'); render();
-  } catch {
-    setSyncState('error','オフライン');
-    if(!cached){tasks=[];render();}
-  }
+function setSS(s,t){ document.getElementById('sync-pill').className=s; document.getElementById('sync-text').textContent=t; }
+async function loadFromSheet(){
+  const c=lsLoad(); if(c){tasks=c;render();}
+  setSS('syncing','同期中');
+  try{ const r=await fetch(GAS_URL+'?t='+Date.now()); tasks=await r.json(); lsSave(); setSS('ok','同期済み'); render(); }
+  catch{ setSS('error','オフライン'); if(!c){tasks=[];render();} }
 }
-async function saveToSheet() {
-  setSyncState('syncing','保存中'); lsSave();
-  try { await fetch(GAS_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({tasks})}); setSyncState('ok','同期済み'); }
-  catch { setSyncState('error','保存失敗'); }
+async function saveToSheet(){
+  setSS('syncing','保存中'); lsSave();
+  try{ await fetch(GAS_URL,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({tasks})}); setSS('ok','同期済み'); }
+  catch{ setSS('error','保存失敗'); }
 }
-function scheduleSave(){clearTimeout(saveTimer);saveTimer=setTimeout(saveToSheet,800);}
+function scheduleSave(){ clearTimeout(saveTimer); saveTimer=setTimeout(saveToSheet,800); }
 
 // ── モーダル ───────────────────────────────
 function openModal(){
@@ -300,7 +261,7 @@ function closeModal(){
   document.getElementById('new-task-input').value='';
   document.getElementById('save-btn').disabled=true;
 }
-function updateSaveBtn(){document.getElementById('save-btn').disabled=!document.getElementById('new-task-input').value.trim();}
+function updateSaveBtn(){ document.getElementById('save-btn').disabled=!document.getElementById('new-task-input').value.trim(); }
 function saveTask(){
   const inp=document.getElementById('new-task-input');
   const text=inp.value.trim(); if(!text)return;
@@ -309,30 +270,26 @@ function saveTask(){
 }
 
 // ── タスク操作 ─────────────────────────────
-function toggleTask(id) {
+function toggleTask(id){
   const t=tasks.find(t=>t.id===id); if(!t)return;
-  if(!t.done) {
-    // アニメーション → 完了 → Undo表示
+  if(!t.done){
     const el=document.querySelector(`[data-id="${id}"] .check-circle`);
     if(el) el.classList.add('checking');
     setTimeout(()=>{
       t.done=true;
-      undoTask={...t, done:false};
-      showUndoToast();
+      pushUndo({type:'complete', task:{...t,done:false}});
       render(); scheduleSave();
-    },300);
+    },280);
   } else {
     t.done=false; render(); scheduleSave();
   }
 }
 
-function deleteTask(id) {
-  const idx=tasks.findIndex(t=>t.id===id);
-  if(idx===-1)return;
-  deletedTask={...tasks[idx]}; deletedIndex=idx;
+function deleteTask(id){
+  const idx=tasks.findIndex(t=>t.id===id); if(idx===-1)return;
+  pushUndo({type:'delete', task:{...tasks[idx]}, index:idx});
   tasks.splice(idx,1);
-  closeActions();
-  render(); scheduleSave();
+  closeActions(); render(); scheduleSave();
 }
 
 function setFilter(val,btn){
@@ -340,15 +297,72 @@ function setFilter(val,btn){
   document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active'); render();
 }
-function esc(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
-// ── アクション展開（テキストタップ/クリック） ─
-function toggleActions(id, el) {
-  if(openActionId===id) { closeActions(); return; }
+// ── Undo ───────────────────────────────────
+function pushUndo(entry){
+  // 以前のtoastを消す
+  clearAllUndoToasts();
+  undoStack.push(entry);
+  showUndoToast(entry);
+}
+
+function showUndoToast(entry){
+  const msg = entry.type==='complete' ? 'タスクを完了しました' : 'タスクを削除しました';
+  const toast = document.createElement('div');
+  toast.className = 'undo-toast';
+  toast.innerHTML = `<span>${msg}</span><button class="undo-toast-btn">元に戻す</button>`;
+  toast.querySelector('.undo-toast-btn').addEventListener('click',()=>{
+    doUndo(entry, toast);
+  });
+  document.body.appendChild(toast);
+  requestAnimationFrame(()=>requestAnimationFrame(()=>toast.classList.add('show')));
+  entry._toast = toast;
+  entry._timer = setTimeout(()=>{
+    toast.classList.remove('show');
+    setTimeout(()=>toast.remove(),400);
+  }, 5000);
+}
+
+function doUndo(entry, toast){
+  clearTimeout(entry._timer);
+  toast.classList.remove('show');
+  setTimeout(()=>toast.remove(),400);
+  if(entry.type==='complete'){
+    const t=tasks.find(t=>t.id===entry.task.id);
+    if(t){ t.done=false; render(); scheduleSave(); }
+  } else if(entry.type==='delete'){
+    const idx=Math.min(entry.index, tasks.length);
+    tasks.splice(idx,0,entry.task);
+    render(); scheduleSave();
+  }
+}
+
+function clearAllUndoToasts(){
+  document.querySelectorAll('.undo-toast').forEach(t=>{
+    t.classList.remove('show');
+    setTimeout(()=>t.remove(),400);
+  });
+}
+
+// Cmd+Z / Ctrl+Z
+document.addEventListener('keydown',e=>{
+  if((e.metaKey||e.ctrlKey)&&e.key==='z'){
+    e.preventDefault();
+    if(undoStack.length===0)return;
+    const entry=undoStack.pop();
+    if(entry._toast){ clearTimeout(entry._timer); entry._toast.classList.remove('show'); setTimeout(()=>entry._toast.remove(),400); }
+    doUndo(entry, {classList:{remove:()=>{}}, remove:()=>{}});
+  }
+});
+
+// ── アクション展開 ─────────────────────────
+function toggleActions(id){
+  if(openActionId===id){ closeActions(); return; }
   closeActions();
   openActionId=id;
-  const actionsEl=el.querySelector('.task-actions');
-  if(actionsEl) actionsEl.classList.add('open');
+  const el=document.querySelector(`[data-id="${id}"] .task-actions`);
+  if(el) el.classList.add('open');
 }
 function closeActions(){
   if(openActionId===null)return;
@@ -363,47 +377,13 @@ function consultClaude(id){
   closeActions();
   const prompt=encodeURIComponent(`以下のタスクを進めるために、具体的なアドバイスや手順を教えてください：\n\n「${t.text}」`);
   if(isMobile){
-    // iOSアプリへのディープリンク（フォールバックあり）
-    const appUrl=`claude://new?q=${prompt}`;
-    const webUrl=`https://claude.ai/new?q=${prompt}`;
-    const iframe=document.createElement('iframe');
-    iframe.style.display='none'; document.body.appendChild(iframe);
-    iframe.src=appUrl;
-    setTimeout(()=>{ document.body.removeChild(iframe); window.location.href=webUrl; },1500);
-    window.location.href=appUrl;
+    // iOSアプリ deeplink → フォールバックでブラウザ
+    window.location.href=`claude://new?q=${prompt}`;
+    setTimeout(()=>{ window.open(`https://claude.ai/new?q=${prompt}`,'_blank'); },1200);
   } else {
     window.open(`https://claude.ai/new?q=${prompt}`,'_blank');
   }
 }
-
-// ── Undo（完了取り消し） ──────────────────
-function showUndoToast(){
-  clearTimeout(undoTimer);
-  const toast=document.getElementById('undo-toast');
-  toast.classList.add('show');
-  undoTimer=setTimeout(()=>{ toast.classList.remove('show'); undoTask=null; },5000);
-}
-function undoComplete(){
-  if(!undoTask)return;
-  clearTimeout(undoTimer);
-  document.getElementById('undo-toast').classList.remove('show');
-  const t=tasks.find(t=>t.id===undoTask.id);
-  if(t){ t.done=false; render(); scheduleSave(); }
-  undoTask=null;
-}
-
-// ── Cmd+Z（削除取り消し） ─────────────────
-document.addEventListener('keydown',e=>{
-  if((e.metaKey||e.ctrlKey)&&e.key==='z'&&deletedTask){
-    e.preventDefault();
-    tasks.splice(deletedIndex,0,deletedTask);
-    deletedTask=null; deletedIndex=null;
-    render(); scheduleSave();
-    const t=document.getElementById('cmdz-toast');
-    t.classList.add('show');
-    setTimeout(()=>t.classList.remove('show'),2000);
-  }
-});
 
 // ── レンダリング ───────────────────────────
 function render(){
@@ -411,38 +391,25 @@ function render(){
   main.innerHTML='';
   const active=tasks.filter(t=>!t.done);
   const done  =tasks.filter(t=> t.done);
-  let showActive,showDone;
-  if     (currentFilter==='active'){showActive=active;showDone=[];}
-  else if(currentFilter==='done'  ){showActive=[];showDone=done;}
-  else                             {showActive=active;showDone=done;}
+  let sA,sD;
+  if     (currentFilter==='active'){sA=active;sD=[];}
+  else if(currentFilter==='done'  ){sA=[];sD=done;}
+  else                             {sA=active;sD=done;}
 
-  if(showActive.length===0&&showDone.length===0){
+  if(sA.length===0&&sD.length===0){
     const msg=document.createElement('div'); msg.id='empty-msg';
     msg.textContent=currentFilter==='done'?'完了済みのタスクはありません':
                     currentFilter==='active'?'タスクを追加してみましょう':'タスクがありません';
     main.appendChild(msg); return;
   }
-  showActive.forEach(t=>main.appendChild(makeTaskEl(t)));
-  if(showDone.length>0){
+  sA.forEach(t=>main.appendChild(makeTaskEl(t)));
+  if(sD.length>0){
     if(currentFilter==='all'){
       const hdr=document.createElement('div'); hdr.className='section-header';
-      hdr.textContent=`完了済み（${showDone.length}）`; main.appendChild(hdr);
+      hdr.textContent=`完了済み（${sD.length}）`; main.appendChild(hdr);
     }
-    showDone.forEach(t=>main.appendChild(makeTaskEl(t)));
+    sD.forEach(t=>main.appendChild(makeTaskEl(t)));
   }
-
-  // 外クリックで閉じる
-  setTimeout(()=>{
-    document.addEventListener('click', handleOutsideClick, {once:true, capture:true});
-  },0);
-}
-
-function handleOutsideClick(e){
-  if(openActionId!==null){
-    const el=document.querySelector(`[data-id="${openActionId}"]`);
-    if(el&&!el.contains(e.target)){ closeActions(); return; }
-  }
-  if(openActionId!==null) document.addEventListener('click',handleOutsideClick,{once:true,capture:true});
 }
 
 function makeTaskEl(task){
@@ -459,9 +426,6 @@ function makeTaskEl(task){
         <button class="task-action-btn task-action-consult">✦ Claudeに相談</button>
         <button class="task-action-btn task-action-delete">✕ 削除</button>
       </div>
-    </div>
-    <div class="drag-handle" title="ドラッグして並び替え">
-      <span></span><span></span><span></span>
     </div>`;
 
   // 丸ボタン → 完了
@@ -469,84 +433,152 @@ function makeTaskEl(task){
     e.stopPropagation(); toggleTask(task.id);
   });
 
-  // テキストボディをタップ/クリック → アクション展開
-  const body=div.querySelector('.task-body');
-  body.addEventListener('click', e=>{
-    e.stopPropagation();
-    if(e.target.classList.contains('task-action-consult')){ consultClaude(task.id); return; }
-    if(e.target.classList.contains('task-action-delete')) { deleteTask(task.id); return; }
-    toggleActions(task.id, div);
+  // アクションボタン
+  div.querySelector('.task-action-consult').addEventListener('click', e=>{
+    e.stopPropagation(); consultClaude(task.id);
+  });
+  div.querySelector('.task-action-delete').addEventListener('click', e=>{
+    e.stopPropagation(); deleteTask(task.id);
   });
 
-  // ドラッグハンドル
-  const handle=div.querySelector('.drag-handle');
-  handle.addEventListener('touchstart', e=>{ e.stopPropagation(); startTouchDrag(div,task.id,e); },{passive:true});
-  handle.addEventListener('mousedown', ()=>{ div.draggable=true; });
-  div.addEventListener('dragend', ()=>{ div.draggable=false; });
-  div.addEventListener('dragstart', e=>{
-    dragSrcId=task.id; e.dataTransfer.effectAllowed='move';
-    const ghost=document.getElementById('drag-ghost');
-    ghost.textContent=task.text; ghost.classList.add('visible');
-    ghost.style.left=e.clientX+10+'px'; ghost.style.top=e.clientY-20+'px';
-    setTimeout(()=>div.classList.add('ghost-src'),0);
-  });
-  div.addEventListener('dragover', e=>{ e.preventDefault(); clearDragOver(); div.classList.add('drag-over'); });
-  div.addEventListener('dragleave', ()=>div.classList.remove('drag-over'));
-  div.addEventListener('drop', e=>{
-    e.preventDefault(); div.classList.remove('drag-over');
-    if(dragSrcId&&dragSrcId!==task.id) reorderTasks(dragSrcId,task.id);
-  });
+  // テキストタップ/クリック → アクション展開
+  const body=div.querySelector('.task-body');
+
+  if(isMobile){
+    // スマホ：タップ vs 長押し（ドラッグ）を判定
+    let touchStartY=0, touchStartX=0, touchStartTime=0;
+    let longPressTimer=null, isDragging=false;
+
+    body.addEventListener('touchstart', e=>{
+      touchStartY=e.touches[0].clientY;
+      touchStartX=e.touches[0].clientX;
+      touchStartTime=Date.now();
+      isDragging=false;
+      longPressTimer=setTimeout(()=>{
+        isDragging=true;
+        startTouchDrag(div, task.id, e);
+      }, 500);
+    },{passive:true});
+
+    body.addEventListener('touchmove', e=>{
+      const dy=Math.abs(e.touches[0].clientY-touchStartY);
+      const dx=Math.abs(e.touches[0].clientX-touchStartX);
+      if(dy>8||dx>8) clearTimeout(longPressTimer);
+    },{passive:true});
+
+    body.addEventListener('touchend', e=>{
+      clearTimeout(longPressTimer);
+      if(!isDragging && Date.now()-touchStartTime < 500){
+        toggleActions(task.id);
+      }
+    });
+  } else {
+    // Mac：クリックでアクション展開
+    body.addEventListener('click', e=>{
+      e.stopPropagation();
+      toggleActions(task.id);
+    });
+  }
+
+  // デスクトップ drag（Mac）
+  if(!isMobile){
+    div.addEventListener('dragstart', e=>{
+      dragSrcId=task.id; e.dataTransfer.effectAllowed='move';
+      setTimeout(()=>div.classList.add('is-dragging'),0);
+    });
+    div.addEventListener('dragend', ()=>{
+      div.classList.remove('is-dragging');
+      document.querySelectorAll('.task-item').forEach(i=>i.classList.remove('drag-over-top','drag-over-bottom'));
+      dragSrcId=null;
+    });
+    div.addEventListener('dragover', e=>{
+      e.preventDefault();
+      const rect=div.getBoundingClientRect();
+      const mid=rect.top+rect.height/2;
+      document.querySelectorAll('.task-item').forEach(i=>i.classList.remove('drag-over-top','drag-over-bottom'));
+      div.classList.add(e.clientY<mid?'drag-over-top':'drag-over-bottom');
+      dragOverId=task.id; dragOverPos=(e.clientY<mid?'before':'after');
+    });
+    div.addEventListener('dragleave', ()=>div.classList.remove('drag-over-top','drag-over-bottom'));
+    div.addEventListener('drop', e=>{
+      e.preventDefault();
+      div.classList.remove('drag-over-top','drag-over-bottom');
+      if(dragSrcId&&dragSrcId!==task.id) reorderTasks(dragSrcId,task.id,dragOverPos);
+    });
+    div.draggable=true;
+  }
 
   return div;
 }
 
-// ── ドラッグ ───────────────────────────────
-let dragSrcId=null;
-function clearDragOver(){ document.querySelectorAll('.task-item').forEach(i=>i.classList.remove('drag-over')); }
-document.addEventListener('dragend',()=>{
-  document.getElementById('drag-ghost').classList.remove('visible');
-  document.querySelectorAll('.task-item').forEach(i=>{ i.classList.remove('ghost-src','drag-over'); i.draggable=false; });
-});
-document.addEventListener('dragover',e=>{
-  const g=document.getElementById('drag-ghost');
-  g.style.left=Math.min(e.clientX+14,window.innerWidth-220)+'px';
-  g.style.top =e.clientY-16+'px';
-});
+// 外クリックでアクション閉じる
+document.addEventListener('click', ()=>closeActions());
 
-function startTouchDrag(dragEl,taskId,startEvent){
-  const ghost=document.getElementById('drag-ghost');
+// ── デスクトップ drag ──────────────────────
+let dragSrcId=null, dragOverId=null, dragOverPos='after';
+
+// ── タッチドラッグ（スマホ長押し） ────────
+function startTouchDrag(dragEl, taskId, startEvent){
   const task=tasks.find(t=>t.id===taskId); if(!task)return;
-  const t0=startEvent.touches[0];
-  ghost.textContent=task.text;
-  ghost.style.left=Math.min(t0.clientX+10,window.innerWidth-220)+'px';
-  ghost.style.top =t0.clientY-20+'px';
-  ghost.classList.add('visible'); dragEl.classList.add('ghost-src');
-  let currentTarget=null;
+
+  // フローティングクローン
+  const rect=dragEl.getBoundingClientRect();
+  const clone=dragEl.cloneNode(true);
+  clone.classList.add('floating');
+  clone.style.width=rect.width+'px';
+  clone.style.top=rect.top+'px';
+  document.body.appendChild(clone);
+  dragEl.classList.add('is-dragging');
+
+  const offsetY=startEvent.touches[0].clientY-rect.top;
+
   function onMove(e){
-    const t=e.touches[0];
-    ghost.style.left=Math.min(t.clientX+10,window.innerWidth-220)+'px';
-    ghost.style.top =t.clientY-20+'px';
-    const el=document.elementFromPoint(t.clientX,t.clientY);
-    const target=el?el.closest('.task-item'):null;
-    clearDragOver();
-    if(target&&target!==dragEl){target.classList.add('drag-over');currentTarget=target;}
-    else currentTarget=null;
+    e.preventDefault();
+    const ty=e.touches[0].clientY;
+    clone.style.top=(ty-offsetY)+'px';
+
+    // どのアイテムの上にいるか
+    document.querySelectorAll('.task-item:not(.is-dragging):not(.floating)').forEach(item=>{
+      item.classList.remove('drag-over-top','drag-over-bottom');
+      const r=item.getBoundingClientRect();
+      if(ty>=r.top&&ty<=r.bottom){
+        const mid=r.top+r.height/2;
+        item.classList.add(ty<mid?'drag-over-top':'drag-over-bottom');
+      }
+    });
   }
-  function onEnd(){
-    ghost.classList.remove('visible'); dragEl.classList.remove('ghost-src'); clearDragOver();
-    if(currentTarget) reorderTasks(taskId,parseInt(currentTarget.dataset.id));
+
+  function onEnd(e){
+    clone.remove(); dragEl.classList.remove('is-dragging');
+    document.querySelectorAll('.task-item').forEach(i=>i.classList.remove('drag-over-top','drag-over-bottom'));
+
+    // drop先を探す
+    const ty=e.changedTouches[0].clientY;
+    let targetId=null, pos='after';
+    document.querySelectorAll('.task-item:not(.is-dragging)').forEach(item=>{
+      const r=item.getBoundingClientRect();
+      if(ty>=r.top&&ty<=r.bottom){
+        targetId=parseInt(item.dataset.id);
+        pos=ty<(r.top+r.height/2)?'before':'after';
+      }
+    });
+    if(targetId&&targetId!==taskId) reorderTasks(taskId,targetId,pos);
+
     document.removeEventListener('touchmove',onMove);
     document.removeEventListener('touchend',onEnd);
   }
-  document.addEventListener('touchmove',onMove,{passive:true});
+
+  document.addEventListener('touchmove',onMove,{passive:false});
   document.addEventListener('touchend',onEnd);
 }
 
-function reorderTasks(srcId,tgtId){
+function reorderTasks(srcId,tgtId,pos='after'){
   const si=tasks.findIndex(t=>t.id===srcId);
   const ti=tasks.findIndex(t=>t.id===tgtId);
   if(si===-1||ti===-1)return;
-  const[moved]=tasks.splice(si,1); tasks.splice(ti,0,moved);
+  const[moved]=tasks.splice(si,1);
+  const newTi=tasks.findIndex(t=>t.id===tgtId);
+  tasks.splice(pos==='before'?newTi:newTi+1,0,moved);
   render(); scheduleSave();
 }
 
@@ -567,8 +599,6 @@ function fallbackCopy(text,cb){
   document.body.appendChild(ta); ta.focus(); ta.select();
   document.execCommand('copy'); document.body.removeChild(ta); cb();
 }
-
-// ── Toast ──────────────────────────────────
 let toastTimer;
 function showToast(msg){
   let t=document.getElementById('_toast');
