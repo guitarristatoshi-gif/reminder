@@ -1,0 +1,6 @@
+anthropic>=1.0
+pydantic>=2
+# ffmpeg が PATH に無いときの保険（mac は brew install ffmpeg を推奨）
+imageio-ffmpeg>=0.6
+# 任意: 自動文字起こし
+# faster-whisper>=1.0

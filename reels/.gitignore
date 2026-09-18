@@ -1,0 +1,4 @@
+*.mp4
+*_reels/
+*.transcript.json
+__pycache__/
